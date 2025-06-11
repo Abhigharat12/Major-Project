@@ -1,0 +1,77 @@
+.navbar{
+    height: 5rem;
+    background: white;
+}
+
+.fa-compass {
+    color: red;
+    font-size: 2rem;
+    
+}
+.nav-link {
+    color: black !important;
+
+}
+.f-info {
+    text-align: center;
+    height: auto;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    border-top: 2px solid #ccc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.f-info_socials i {
+    font-size: 1.5rem;
+    margin: 0 0.5rem;
+    /* ❌ REMOVE color here to allow brand color to show */
+    transition: transform 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Default brand colors */
+.social-facebook {
+    color: #1877F2;
+}
+
+.social-instagram {
+    color: #E1306C;
+}
+
+.social-linkedin {
+    color: #0077B5;
+}
+
+/* Hover effect (no color change) */
+.f-info_socials i:hover {
+    transform: scale(1.2);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+}
+
+.f-info-links {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.f-info-links a {
+    text-decoration: none;
+    color: #333;
+    transition: color 0.3s;
+}
+
+.f-info-links a:hover {
+    text-decoration: underline;
+    color: #000;
+}
+
+.f-info-text {
+    font-size: 1rem;
+    color: #555;
+}
+
