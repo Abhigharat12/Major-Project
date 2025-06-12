@@ -1,36 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wanderlust</title>
-  </head>
-  <body>
-    <h3>Edit your Listing</h3>
-    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT">
-      <input name="listing[title]" value="<%= listing.title %>" type="text" />
-      <br /><br />
-      <textarea name="listing[description]">
-<%= listing.description %></textarea
-      >
-      <br /><br />
-      <input name="listing[image]" value="<%= listing.image %>" type="text" />
-      <br /><br />
-      <input name="listing[price]" value="<%= listing.price %>" type="number" />
-      <br /><br />
-      <input
-        name="listing[country]"
-        value="<%= listing.country %>"
-        type="text"
-      />
-      <br /><br />
-      <input
-        name="listing[location]"
-        value="<%= listing.location %>"
-        type="text"
-      />
-      <br /><br />
-      <button>Edit</button>
-    </form>
-  </body>
-</html>
+<% layout('/layouts/boilerplate.ejs') -%>
+
+<body style="
+background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+">
+
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-7 shadow p-5 rounded-4 bg-white bg-opacity-75 border border-success-subtle">
+        <h2 class="mb-4 text-center text-success fw-bold">Edit Your Listing</h2>
+
+        <form method="POST" action="/listings/<%= listing._id %>?_method=PUT">
+          <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input id="title" name="listing[title]" value="<%= listing.title %>" placeholder="e.g. Beachside Villa" type="text" class="form-control border-success shadow-sm" />
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea name="listing[description]" placeholder="Describe the experience..." class="form-control border-success shadow-sm" rows="3"><%= listing.description %></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="image" class="form-label">Image URL</label>
+            <input name="listing[image]" value="<%= listing.image %>" placeholder="https://..." type="text" class="form-control border-success shadow-sm" />
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="price" class="form-label">Price</label>
+              <input name="listing[price]" value="<%= listing.price %>" placeholder="Enter price" type="number" class="form-control border-success shadow-sm" />
+            </div>
+            <div class="col-md-8 mb-3">
+              <label for="country" class="form-label">Country</label>
+              <input name="listing[country]" value="<%= listing.country %>" placeholder="e.g. India" type="text" class="form-control border-success shadow-sm" />
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="location" class="form-label">Location</label>
+            <input name="listing[location]" value="<%= listing.location %>" placeholder="e.g. Goa" type="text" class="form-control border-success shadow-sm" />
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3 shadow-sm">Save Changes</button>
+            <a href="/listings/<%= listing._id %>" class="btn btn-outline-secondary btn-sm mt-3">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>

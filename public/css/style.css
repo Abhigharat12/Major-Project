@@ -1,10 +1,13 @@
-body{
-    font-family: "Plus Jakarta Sans",sans-serif !important;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-
+body {
+  font-family: "Plus Jakarta Sans", sans-serif !important;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0; /* ensure no default margin */
+  padding: 0; /* avoid any unwanted space */
 }
+
+
 .container{
     flex: 1;
 }
@@ -25,17 +28,18 @@ body{
 
 }
 .f-info {
-    text-align: center;
-    height: auto;
-    padding: 2rem 1rem;
-    background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    border-top: 2px solid #ccc;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  width: 100%;
+  padding: 1.5rem 1rem;
+  background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  border-top: 2px solid #ccc;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 
 .f-info_socials i {
     font-size: 1.5rem;
@@ -225,6 +229,43 @@ body{
   text-decoration: none;
   color: inherit;
 }
+
+
+
+.btn-style-1 {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.7rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 242, 254, 0.4);
+  text-decoration: none;
+}
+
+.btn-style-1:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #ff6b6b, #ff4e50);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.7rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 110, 110, 0.4);
+  text-decoration: none;
+}
+
+.btn-delete:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 110, 110, 0.5);
+}
+
 
 
 

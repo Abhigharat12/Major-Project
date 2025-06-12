@@ -1,18 +1,48 @@
-<%  layout("/layouts/boilerplate.ejs") -%>
+<% layout("/layouts/boilerplate.ejs") -%>
 
-  <body>
-    <h3>Listing Details :</h3>
-    <ul>
-      <li><%= listing.title %></li>
-      <li><%= listing.description %></li>
-      <li>&#8377; <%= listing.price.toLocaleString("en-IN") %></li>
-      <li><%= listing.location %></li>
-      <li><%= listing.country %></li>
+
+
+<body class="p-4">
+
+  
+
+  <div class="container">
+    <h3 class="mb-4 text-success text-center" style="margin-top: 1rem;">Listing Details</h3>
+
+<div class="row align-items-center gy-4">
+  <!-- Details: Full width on small, left side on medium+ -->
+  <div class="col-12 col-md-6">
+    <ul class="list-group shadow-sm mb-4">
+      <li class="list-group-item"><strong>Title:</strong> <%= listing.title %></li>
+      <li class="list-group-item"><strong>Description:</strong> <%= listing.description %></li>
+      <li class="list-group-item"><strong>Price:</strong> ₹ <%= listing.price.toLocaleString("en-IN") %></li>
+      <li class="list-group-item"><strong>Location:</strong> <%= listing.location %></li>
+      <li class="list-group-item"><strong>Country:</strong> <%= listing.country %></li>
     </ul>
-    <br />
-    <a href="/listings/<%= listing._id %>/edit">Edit this Listing</a>
-    <br /><br />
-    <form method="POST" action="/listings/<%=listing._id%>?_method=DELETE">
-      <button>Delete this listing</button>
-    </form>
-  </body>
+
+    <div class="d-flex flex-wrap gap-2">
+      <a href="/listings/<%= listing._id %>/edit" class="btn-style-1">Edit Listing</a>
+      <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+        <button class="btn-delete ">Delete Listing</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Image: Full width on small, right side on medium+ -->
+  <div class="col-12 col-md-6 text-center">
+    <img src="<%= listing.image %>" alt="Listing Image"
+         class="img-fluid rounded shadow"
+         style="max-height: 400px; object-fit: cover; width: 100%;" />
+  </div>
+</div>
+
+  </div>
+
+  
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+
+</body>
