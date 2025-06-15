@@ -1,0 +1,101 @@
+<% layout('/layouts/boilerplate.ejs') -%>
+<title>Admin - All Users</title>
+
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 2rem;
+  }
+
+  h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 2rem;
+  }
+
+  .user-table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .user-table th, .user-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  .user-table th {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  .user-table tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  .delete-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .back-btn {
+    display: inline-block;
+    margin: 2rem auto;
+    padding: 0.6rem 1.2rem;
+    background-color: #4caf50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .back-btn:hover {
+    background-color: #45a049;
+  }
+</style>
+
+<h2>All Registered Users</h2>
+
+<table class="user-table">
+  <thead>
+    <tr>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Admin</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% users.forEach(user => { %>
+      <tr>
+        <td><%= user.email %></td>
+        <td><%= user.phone || "N/A" %></td>
+        <td><%= user.isAdmin ? "Yes" : "No" %></td>
+        <td>
+          <% if (!user.isAdmin) { %>
+            <form action="/auth/users/<%= user._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete user <%= user.email %>?');">
+              <button type="submit" class="delete-btn">Delete</button>
+            </form>
+          <% } else { %>
+            <span style="color: gray;">Protected</span>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<div style="text-align: center;">
+  <a href="/listings" class="back-btn">Back to Listings</a>
+</div>

@@ -12,46 +12,51 @@ background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b
       <div class="col-md-8 col-lg-7 shadow p-4 rounded-4 bg-light mb-5">
         <h3 class="mb-4 text-center">📝 Create a New Listing</h3>
 
-        <form method="POST" action="/listings">
+        <form method="POST" action="/listings" class="needs-validation" novalidate>
           <div class="mb-3">
             <label for="title" class="form-label">Title</label>
-            <input id="title" name="listing[title]" placeholder="Enter title" type="text" class="form-control" />
+            <input id="title" name="listing[title]" type="text" class="form-control" required placeholder="Enter title">
+            <div class="valid-feedback">Looks Great!</div>
           </div>
 
           <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <textarea name="listing[description]" placeholder="Enter description" class="form-control" rows="2"></textarea>
+            <textarea id="description" name="listing[description]" class="form-control" rows="3" required placeholder="Enter description"></textarea>
+            <div class="invalid-feedback">Please provide a short description.</div>
           </div>
 
           <div class="mb-3">
             <label for="image" class="form-label">Image URL</label>
-            <input name="listing[image]" placeholder="Enter image URL" type="text" class="form-control" />
+            <input id="image" name="listing[image]" type="text" class="form-control" placeholder="Enter image URL">
+            <div class="invalid-feedback"></div>
+
           </div>
 
           <div class="row">
-            <div class="col-md-4 mb-3">
+            <div class="col-md-5 mb-3">
               <label for="price" class="form-label">Price</label>
-              <input name="listing[price]" placeholder="Enter price" type="number" class="form-control" />
+              <input id="price" name="listing[price]" type="number" class="form-control" required placeholder="Enter price">
+              <div class="invalid-feedback">Please provide a price.</div>
             </div>
-            <div class="col-md-8 mb-3">
+
+            <div class="col-md-7 mb-3">
               <label for="country" class="form-label">Country</label>
-              <input name="listing[country]" placeholder="Enter country" type="text" class="form-control" />
+              <input id="country" name="listing[country]" type="text" class="form-control" required placeholder="Enter country">
+              <div class="invalid-feedback">Please provide a country.</div>
             </div>
           </div>
 
           <div class="mb-4">
             <label for="location" class="form-label">Location</label>
-            <input name="listing[location]" placeholder="Enter location" type="text" class="form-control" />
+            <input id="location" name="listing[location]" type="text" class="form-control" required placeholder="Enter location">
+            <div class="invalid-feedback">Please provide a location.</div>
           </div>
 
           <div class="d-grid">
             <button type="submit" class="btn btn-success btn-lg">➕ Add Listing</button>
-            <br>
-            <br>
-          
           </div>
         </form>
       </div>
     </div>
   </div>
-</body>
+</div>

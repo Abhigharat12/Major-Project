@@ -2,27 +2,29 @@
 
 <body style="
 background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  min-height: 100vh;
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+min-height: 100vh;
 ">
-
-
   <div class="container my-5">
     <div class="row justify-content-center">
       <div class="col-md-8 col-lg-7 shadow p-5 rounded-4 bg-white bg-opacity-75 border border-success-subtle">
         <h2 class="mb-4 text-center text-success fw-bold">Edit Your Listing</h2>
 
-        <form method="POST" action="/listings/<%= listing._id %>?_method=PUT">
+        <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" class="needs-validation" novalidate>
           <div class="mb-3">
             <label for="title" class="form-label">Title</label>
-            <input id="title" name="listing[title]" value="<%= listing.title %>" placeholder="e.g. Beachside Villa" type="text" class="form-control border-success shadow-sm" />
+            <input id="title" name="listing[title]" value="<%= listing.title %>" placeholder="Amazing Title" type="text" class="form-control border-success shadow-sm" required />
+            <div class="invalid-feedback">Please provide a title.</div>
+            <div class="valid-feedback">Looks great!</div>
           </div>
 
           <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <textarea name="listing[description]" placeholder="Describe the experience..." class="form-control border-success shadow-sm" rows="3"><%= listing.description %></textarea>
+            <textarea name="listing[description]" placeholder="Describe the experience..." class="form-control border-success shadow-sm" rows="3" required><%= listing.description %></textarea>
+            <div class="invalid-feedback">Please enter a description.</div>
+            <div class="valid-feedback">Nice and clear!</div>
           </div>
 
           <div class="mb-3">
@@ -33,17 +35,23 @@ background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="price" class="form-label">Price</label>
-              <input name="listing[price]" value="<%= listing.price %>" placeholder="Enter price" type="number" class="form-control border-success shadow-sm" />
+              <input name="listing[price]" value="<%= listing.price %>" placeholder="Enter price" type="number" class="form-control border-success shadow-sm" required />
+              <div class="invalid-feedback">Price is required.</div>
+              <div class="valid-feedback"> Price looks good!</div>
             </div>
             <div class="col-md-8 mb-3">
               <label for="country" class="form-label">Country</label>
-              <input name="listing[country]" value="<%= listing.country %>" placeholder="e.g. India" type="text" class="form-control border-success shadow-sm" />
+              <input name="listing[country]" value="<%= listing.country %>" placeholder="e.g. India" type="text" class="form-control border-success shadow-sm" required />
+              <div class="invalid-feedback">Enter the country.</div>
+              <div class="valid-feedback">Perfect!</div>
             </div>
           </div>
 
           <div class="mb-4">
             <label for="location" class="form-label">Location</label>
-            <input name="listing[location]" value="<%= listing.location %>" placeholder="e.g. Goa" type="text" class="form-control border-success shadow-sm" />
+            <input name="listing[location]" value="<%= listing.location %>" placeholder="e.g. Goa" type="text" class="form-control border-success shadow-sm" required />
+            <div class="invalid-feedback">Please provide a location.</div>
+            <div class="valid-feedback">Location added </div>
           </div>
 
           <div class="d-grid">

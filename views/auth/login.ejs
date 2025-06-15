@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login & Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+
+    .card {
+      background: white;
+      width: 100%;
+      max-width: 460px;
+      padding: 2.5rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab {
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      background-color: #f0f0f0;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    input {
+      margin: 0.4rem 0;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      border-color: #4facfe;
+      outline: none;
+    }
+
+    .submit-btn {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+    }
+
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border: 1px solid #ccc;
+      color: #444;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-top: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .google-btn:hover {
+      background-color: #f7f7f7;
+    }
+
+    .google-btn img {
+      width: 20px;
+      margin-right: 10px;
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    .form-section.active {
+      display: block;
+      animation: fade 0.3s ease-in-out;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        padding: 2rem 1.5rem;
+      }
+    }
+
+    .error-message {
+      color: red;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Welcome</h2>
+
+    <% if (typeof error !== 'undefined') { %>
+      <div class="error-message"><%= error %></div>
+    <% } %>
+
+    <!-- Tab Navigation -->
+    <div class="tabs">
+      <div class="tab active" onclick="showSection(event, 'userLogin')">User Login</div>
+      <div class="tab" onclick="showSection(event, 'register')">Register</div>
+      <div class="tab" onclick="showSection(event, 'adminLogin')">Admin</div>
+    </div>
+
+    <!-- User Login -->
+    <div id="userLogin" class="form-section active">
+      <form method="POST" action="/auth/login">
+        <input type="text" name="email" placeholder="Email or Phone" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button class="submit-btn" type="submit">Login</button>
+      </form>
+
+      <form method="GET" action="/auth/google">
+        <button class="google-btn" type="submit">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+          Continue with Google
+        </button>
+      </form>
+    </div>
+
+    <!-- Register -->
+    <div id="register" class="form-section">
+      <form method="POST" action="/auth/register">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="phone" placeholder="Phone (optional)">
+        <input type="password" name="password" placeholder="Password" required>
+        <button class="submit-btn" type="submit">Register</button>
+      </form>
+    </div>
+
+    <!-- Admin Login -->
+    <div id="adminLogin" class="form-section">
+      <form method="POST" action="/auth/admin-login">
+        <input type="text" name="email" placeholder="Admin Email" required>
+        <input type="password" name="password" placeholder="Admin Password" required>
+        <button class="submit-btn" type="submit">Login as Admin</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function showSection(event, id) {
+      const tabs = document.querySelectorAll('.tab');
+      const sections = document.querySelectorAll('.form-section');
+
+      tabs.forEach(tab => tab.classList.remove('active'));
+      sections.forEach(section => section.classList.remove('active'));
+
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>

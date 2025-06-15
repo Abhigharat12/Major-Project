@@ -3,8 +3,11 @@
 <body>
   <h3>All Listings</h3>
 
-  <form method="GET" action="/listings/new">
-  </form>
+  <% if (currentUser) { %>
+    <form method="GET" action="/listings/new" class="mb-4">
+      <button type="submit" class="btn btn-primary">+ Add New Listing</button>
+    </form>
+  <% } %>
 
   <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
     <% for (let listing of allListings) { %>
