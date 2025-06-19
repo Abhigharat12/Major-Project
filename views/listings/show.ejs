@@ -3,37 +3,95 @@
 <body class="p-4">
 
   <div class="container">
-    <h3 class="mb-4 text-success text-center" style="margin-top: 1rem;">Listing Details</h3>
 
-<div class="row align-items-center gy-4">
+    <!-- Listing Title -->
+    <h3 class="mb-4 text-success text-center" style="margin-top: 1rem;"><%= listing.title %></h3>
 
-  <div class="col-12 col-md-6">
-    <ul class="list-group shadow-sm mb-4">
-      <li class="list-group-item"><strong>Title:</strong> <%= listing.title %></li>
-      <li class="list-group-item"><strong>Description:</strong> <%= listing.description %></li>
-      <li class="list-group-item"><strong>Price:</strong> ₹ <%= listing.price.toLocaleString("en-IN") %></li>
-      <li class="list-group-item"><strong>Location:</strong> <%= listing.location %></li>
-      <li class="list-group-item"><strong>Country:</strong> <%= listing.country %></li>
-    </ul>
+    <div class="row align-items-center gy-4">
 
-    <div class="d-flex flex-wrap gap-2">
-      <a href="/listings/<%= listing._id %>/edit" class="btn-style-1">Edit Listing</a>
-      <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
-        <button class="btn-delete ">Delete Listing</button>
+      <!-- Listing Details -->
+      <div class="col-12 col-md-6">
+        <ul class="list-group shadow-sm mb-4">
+          <li class="list-group-item"><strong>Title:</strong> <%= listing.title %></li>
+          <li class="list-group-item"><strong>Description:</strong> <%= listing.description %></li>
+          <li class="list-group-item"><strong>Price:</strong> ₹ <%= listing.price.toLocaleString("en-IN") %></li>
+          <li class="list-group-item"><strong>Location:</strong> <%= listing.location %></li>
+          <li class="list-group-item"><strong>Country:</strong> <%= listing.country %></li>
+        </ul>
+
+        <!-- Edit/Delete Buttons -->
+        <div class="d-flex flex-wrap gap-2">
+          <a href="/listings/<%= listing._id %>/edit" class="btn-style-1">Edit Listing</a>
+          <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+            <button class="btn-delete">Delete Listing</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Listing Image -->
+      <div class="col-12 col-md-6 text-center">
+        <img src="<%= listing.image %>" alt="Listing Image"
+             class="img-fluid rounded shadow"
+             style="max-height: 400px; object-fit: cover; width: 100%;" />
+      </div>
+
+    </div>
+
+    <!-- Review Section -->
+    <div class="mt-5 p-4 bg-light rounded shadow-sm">
+      <h4 class="mb-4 text-primary">Leave a Review</h4>
+      <form method="POST" action="/listings/<%= listing._id %>/reviews">
+
+        <!-- Star Rating -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold d-block">Rating</label>
+          <div class="star-rating mb-2">
+            <% for (let i = 5; i >= 1; i--) { %>
+              <input type="radio" id="star<%= i %>" name="review[rating]" value="<%= i %>">
+              <label for="star<%= i %>">&#9733;</label>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Comment -->
+        <div class="mb-3">
+          <label for="comment" class="form-label fw-semibold">Comment</label>
+          <textarea name="review[comment]" id="comment" rows="4" class="form-control shadow-sm" placeholder="Write your feedback here..."></textarea>
+        </div>
+
+        <!-- Submit -->
+        <button class="btn-style-1" style="background: linear-gradient(135deg, #2a71be, #0549a3);">Add Review</button>
       </form>
     </div>
-  </div>
-
-  <!-- Image: Full width on small, right side on medium+ -->
-  <div class="col-12 col-md-6 text-center">
-    <img src="<%= listing.image %>" alt="Listing Image"
-         class="img-fluid rounded shadow"
-         style="max-height: 400px; object-fit: cover; width: 100%;" />
-  </div>
-</div>
 
   </div>
 
- 
+  <!-- Star Rating CSS -->
+  <style>
+    .star-rating {
+      direction: rtl;
+      display: inline-flex;
+    }
+
+    .star-rating input[type="radio"] {
+      display: none;
+    }
+
+    .star-rating label {
+      font-size: 2rem;
+      color: #ccc;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .star-rating input[type="radio"]:checked ~ label {
+      color: #f7c200;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+      color: #f7c200;
+    }
+  </style>
 
 </body>

@@ -15,11 +15,12 @@ require("./config/passport");
 const authRoutes = require("./routes/auth");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError");
+const  {listingSchema} = require("./schema.js");
 
-const MONGO_URL = "mongodb://localhost:27017/feel-alive";
+// const MONGO_URL = "mongodb://localhost:27017/feel-alive";
 
 // MongoDB Connection
-mongoose.connect(MONGO_URL)
+mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log(" Connected to MongoDB"))
   .catch((err) => console.log("❌ MongoDB Error:", err));
 
@@ -39,7 +40,7 @@ app.use(
     secret: process.env.SESSION_SECRET || "keyboard cat",
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: MONGO_URL }),
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
   })
 );
 
@@ -64,6 +65,16 @@ function isLoggedIn(req, res, next) {
   next();
 }
 
+const validateListing = (req, res, next) => {
+  const { error } = listingSchema.validate(req.body, { abortEarly: false });
+
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(", ");
+    throw new ExpressError(msg, 400);
+  }
+
+  next();
+};
 // ==================== PUBLIC ROUTES ====================
 
 app.get("/", wrapAsync(async (req, res) => {
@@ -92,12 +103,11 @@ app.get("/listings/new", isLoggedIn, (req, res) => {
   res.render("listings/new");
 });
 
-app.post("/listings", isLoggedIn, wrapAsync(async (req, res) => {
+app.post("/listings", isLoggedIn, validateListing, wrapAsync(async (req, res) => {
   const newListing = new Listing(req.body.listing);
    if(!req.body.listing){
     throw new ExpressError(400,"Send valid data for listing");
   }
-  co
   await newListing.save();
   res.redirect("/listings");
 }));
@@ -118,7 +128,7 @@ app.get("/listings/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
   res.render("listings/edit", { listing });
 }));
 
-app.put("/listings/:id", isLoggedIn, wrapAsync(async (req, res) => {
+app.put("/listings/:id", isLoggedIn,validateListing, wrapAsync(async (req, res) => {
   if(!req.body.listing){
     throw new ExpressError(400,"Send valid data for listing");
   }
@@ -127,7 +137,7 @@ app.put("/listings/:id", isLoggedIn, wrapAsync(async (req, res) => {
   res.redirect(`/listings/${id}`);
 }));
 
-app.delete("/listings/:id", isLoggedIn, wrapAsync(async (req, res) => {
+app.delete("/listings/:id", isLoggedIn,validateListing, wrapAsync(async (req, res) => {
   const { id } = req.params;
   await Listing.findByIdAndDelete(id);
   res.redirect("/listings");
@@ -135,18 +145,23 @@ app.delete("/listings/:id", isLoggedIn, wrapAsync(async (req, res) => {
 
 // ==================== ERROR HANDLING ====================
 
-// Catch-all for unhandled routes (404)
+// Error middleware
+// Catch 404 for all unhandled routes
 app.use((req, res, next) => {
-  const err = new ExpressError("Page Not Found", 404);
-  next(err);
+  next(new ExpressError("Page Not Found", 404));
 });
 
-
-// Error middleware
+// Error-handling middleware (handles everything else)
 app.use((err, req, res, next) => {
+  // Handle invalid MongoDB ObjectId
+  if (err.name === "CastError") {
+    err.message = "Invalid listing ID format.";
+    err.statusCode = 400;
+  }
+
   const { statusCode = 500 } = err;
   if (!err.message) err.message = "Something went wrong!";
-  res.status(statusCode).render("error", { err, });
+  res.status(statusCode).render("error", { err });
 });
 
 // ==================== START SERVER ====================
