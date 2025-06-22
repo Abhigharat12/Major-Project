@@ -1,15 +1,11 @@
 <% layout("/layouts/boilerplate.ejs") -%>
 
 <body class="p-4">
-
   <div class="container">
-
-    <!-- Listing Title -->
     <h3 class="mb-4 text-success text-center" style="margin-top: 1rem;"><%= listing.title %></h3>
 
     <div class="row align-items-center gy-4">
-
-      <!-- Listing Details -->
+      <!-- Listing Info -->
       <div class="col-12 col-md-6">
         <ul class="list-group shadow-sm mb-4">
           <li class="list-group-item"><strong>Title:</strong> <%= listing.title %></li>
@@ -19,7 +15,6 @@
           <li class="list-group-item"><strong>Country:</strong> <%= listing.country %></li>
         </ul>
 
-        <!-- Edit/Delete Buttons -->
         <div class="d-flex flex-wrap gap-2">
           <a href="/listings/<%= listing._id %>/edit" class="btn-style-1">Edit Listing</a>
           <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
@@ -34,29 +29,30 @@
              class="img-fluid rounded shadow"
              style="max-height: 400px; object-fit: cover; width: 100%;" />
       </div>
-
     </div>
 
-    <!-- Review Section -->
+    <!-- Review Form -->
     <div class="mt-5 p-4 bg-light rounded shadow-sm">
       <h4 class="mb-4 text-primary">Leave a Review</h4>
-      <form method="POST" action="/listings/<%= listing._id %>/reviews">
-
+      <form method="POST" action="/listings/<%= listing._id %>/reviews" novalidate class="needs-validation">
+        
         <!-- Star Rating -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold d-block">Rating</label>
-          <div class="star-rating mb-2">
-            <% for (let i = 5; i >= 1; i--) { %>
-              <input type="radio" id="star<%= i %>" name="review[rating]" value="<%= i %>">
-              <label for="star<%= i %>">&#9733;</label>
-            <% } %>
-          </div>
-        </div>
+<div class="mb-3">
+  <label class="form-label fw-semibold d-block">Rating</label>
+  <div class="star-rating mb-2">
+    <% for (let i = 5; i >= 1; i--) { %>
+      <input type="radio" id="star<%= i %>" name="review[rating]" value="<%= i %>">
+      <label for="star<%= i %>">&#9733;</label>
+    <% } %>
+  </div>
+</div>
+
 
         <!-- Comment -->
         <div class="mb-3">
           <label for="comment" class="form-label fw-semibold">Comment</label>
-          <textarea name="review[comment]" id="comment" rows="4" class="form-control shadow-sm" placeholder="Write your feedback here..."></textarea>
+          <textarea name="review[comment]" id="comment" rows="4" class="form-control shadow-sm" placeholder="Write your feedback here..." required></textarea>
+          <div class="invalid-feedback">Please add some comments for review</div>
         </div>
 
         <!-- Submit -->
@@ -64,13 +60,69 @@
       </form>
     </div>
 
+    <hr />
+
+    <!-- All Reviews -->
+    <h4 class="mb-4">All Reviews</h4>
+    <div class="row">
+      <% listing.reviews.forEach((review, idx) => { %>
+        <div class="col-md-6 mb-4">
+          <div class="p-4 bg-white border rounded-4 shadow-sm h-100">
+            <!-- Reviewer Info -->
+            <div class="d-flex align-items-center mb-3">
+              <div class="me-3">
+                <img 
+                  src="<%= review.author?.gender === 'female' 
+                    ? 'https://cdn-icons-png.flaticon.com/512/2922/2922561.png'
+                    : 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png'
+                  %>" 
+                  class="rounded-circle border" 
+                  alt="User avatar" 
+                  width="50" 
+                  height="50"
+                />
+              </div>
+              <div>
+                <h6 class="mb-0 text-dark fw-semibold">@Admin</h6>
+                <small class="text-muted">
+                  <%= review.createdAt ? new Date(review.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' }) : "No date" %>
+                </small>
+              </div>
+            </div>
+
+            <!-- Star Rating Display -->
+            <div class="mb-2">
+              <% const rating = Math.max(0, Math.min(5, parseInt(review.rating))) %>
+              <% for (let i = 1; i <= 5; i++) { %>
+                <span class="<%= i <= rating ? 'text-warning' : 'text-muted' %>">&#9733;</span>
+              <% } %>
+            </div>
+
+            <!-- Comment -->
+            <p class="mb-2 text-dark" style="line-height: 1.6;"><%= review.comment %></p>
+
+            <!-- Delete Button -->
+            <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="mt-2">
+              <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this review?')">
+                <i class="fa-solid fa-trash"></i> Delete
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <% if ((idx + 1) % 2 === 0) { %>
+          </div><div class="row">
+        <% } %>
+      <% }); %>
+    </div>
   </div>
 
   <!-- Star Rating CSS -->
   <style>
     .star-rating {
-      direction: rtl;
       display: inline-flex;
+      flex-direction: row-reverse; /* ⭐️ Required for correct input-label hover behavior */
+      justify-content: flex-start;
     }
 
     .star-rating input[type="radio"] {
@@ -84,14 +136,18 @@
       transition: color 0.2s;
     }
 
-    .star-rating input[type="radio"]:checked ~ label {
-      color: #f7c200;
-    }
-
     .star-rating label:hover,
     .star-rating label:hover ~ label {
       color: #f7c200;
     }
-  </style>
 
+    .star-rating input[type="radio"]:checked ~ label {
+      color: #ccc;
+    }
+
+    .star-rating input[type="radio"]:checked + label,
+    .star-rating input[type="radio"]:checked + label ~ label {
+      color: #f7c200;
+    }
+  </style>
 </body>

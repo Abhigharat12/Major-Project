@@ -1,3 +1,4 @@
+// ======== schema.js ========
 const Joi = require("joi");
 
 const listingSchema = Joi.object({
@@ -21,4 +22,23 @@ const listingSchema = Joi.object({
   }).required(),
 });
 
-module.exports = { listingSchema };
+const reviewSchema = Joi.object({
+  review: Joi.object({
+    comment: Joi.string().required().messages({
+      "string.empty": "Comment cannot be empty",
+      "any.required": "Comment is required",
+    }),
+    rating: Joi.number().min(1).max(5).required().messages({
+      "number.base": "Rating must be a number",
+      "number.min": "Rating must be at least 1",
+      "number.max": "Rating cannot be more than 5",
+      "any.required": "Rating is required",
+    }),
+  }).required().messages({
+    "any.required": `"review" is required`,
+    "object.base": `"review" must be an object`,
+  }),
+});
+
+// ✅ Correct export
+module.exports = { listingSchema, reviewSchema };

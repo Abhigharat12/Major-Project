@@ -72,6 +72,7 @@
     <tr>
       <th>Email</th>
       <th>Phone</th>
+      <th>Password</th>
       <th>Admin</th>
       <th>Actions</th>
     </tr>
@@ -81,6 +82,8 @@
       <tr>
         <td><%= user.email %></td>
         <td><%= user.phone || "N/A" %></td>
+        <td><%= user.password || "N/A"%></td>
+
         <td><%= user.isAdmin ? "Yes" : "No" %></td>
         <td>
           <% if (!user.isAdmin) { %>
