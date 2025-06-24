@@ -21,16 +21,17 @@ const Review = require("./models/review.js");
 const flash = require("connect-flash");
 
 const sessionOptions = {
-  secret: "mysupersecretecode",
+  secret: process.env.SESSION_SECRET || "keyboard cat",
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
   cookie: {
     expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
   }
-
 };
+
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -46,14 +47,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "keyboard cat",
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
-  })
-);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -74,10 +67,12 @@ app.use("/auth", authRoutes);
 
 function isLoggedIn(req, res, next) {
   if (!req.isAuthenticated()) {
+    req.flash("error", "You must be logged in!");
     return res.redirect("/auth/login");
   }
   next();
 }
+
 
 const validateListing = (req, res, next) => {
   const { error } = listingSchema.validate(req.body, { abortEarly: false });

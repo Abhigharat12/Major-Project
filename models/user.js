@@ -7,7 +7,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  phone: String,
+  phone: {
+    type: String,
+    unique: true,
+    sparse: true, // ✅ fixes the issue with null/"" duplicate errors
+  },
   password: {
     type: String,
     required: function () {

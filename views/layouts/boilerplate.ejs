@@ -42,5 +42,17 @@
     })();
   </script>
   <script src="/js/script.js"></script>
+  <!-- FLASH AUTO-DISMISS -->
+<script>
+  setTimeout(() => {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      alert.classList.remove('show');
+      alert.classList.add('fade');
+      setTimeout(() => alert.remove(), 500);
+    });
+  }, 4000); // or 5000 for longer display
+</script>
+
 </body>
 </html>

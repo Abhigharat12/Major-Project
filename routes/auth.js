@@ -5,62 +5,73 @@ const passport = require("passport");
 const User = require("../models/user");
 const Listing = require("../models/listing");
 
-// ==================== Middleware ====================
+// ========== Middleware ==========
 
-// Protects admin-only routes
 function isAdmin(req, res, next) {
-  if (req.session.user && req.session.user.isAdmin) {
-    return next();
-  }
-  return res.status(403).send("Access denied. Admins only.");
+  if (req.session.user && req.session.user.isAdmin) return next();
+  res.status(403).send("Access denied. Admins only.");
 }
 
-// Optional: Protect routes for logged-in users
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect("/auth/login");
 }
 
-// ==================== AUTH ROUTES ====================
+// ========== Auth Routes ==========
 
-// Show login form
+// Login Page
 router.get("/login", (req, res) => {
-  res.render("login"); // views/login.ejs
+  res.render("auth/login"); // views/auth/login.ejs
 });
 
-// Show registration form
+// Register Page
 router.get("/register", (req, res) => {
-  res.render("register"); // views/register.ejs
+  res.render("auth/register"); // views/auth/register.ejs
 });
 
-// Register new user
 router.post("/register", async (req, res, next) => {
-  const { email, phone, password } = req.body;
+  try {
+    const { email, phone, password } = req.body;
 
-  const existingUser = await User.findOne({ email });
-  if (existingUser)
-    return res.render("login", { error: "Email already exists." });
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.render("auth/login", { error: "Email already exists." });
 
-  const user = new User({ email, phone, password });
-  await user.save();
+    // Normalize phone number to null if blank or only spaces
+    const phoneNormalized = phone?.trim() || null;
 
-  req.login(user, (err) => {
-    if (err) return next(err);
-    return res.redirect("/");
-  });
+    const user = new User({ email, phone: phoneNormalized, password });
+    await user.save();
+
+    req.login(user, (err) => {
+      if (err) return next(err);
+      return res.redirect("/");
+    });
+  } catch (err) {
+    // Check for duplicate key error (phone/email)
+    if (err.code === 11000) {
+      let duplicateField = Object.keys(err.keyValue)[0];
+      let message = `${duplicateField.charAt(0).toUpperCase() + duplicateField.slice(1)} already exists.`;
+      return res.render("auth/login", { error: message });
+    }
+
+    console.error("Registration error:", err);
+    return res.render("auth/login", { error: "Something went wrong. Please try again." });
+  }
 });
 
-// Handle login (email or phone + password)
+
+// User Login (email or phone)
 router.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({
-    $or: [{ email: email }, { phone: email }],
+    $or: [{ email }, { phone: email }],
   });
 
-  if (!user) return res.render("login", { error: "User not found." });
+  if (!user) return res.render("auth/login", { error: "User not found." });
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.render("login", { error: "Incorrect password." });
+  if (!isMatch) return res.render("auth/login", { error: "Incorrect password." });
 
   req.login(user, (err) => {
     if (err) return next(err);
@@ -75,36 +86,29 @@ router.post("/logout", (req, res) => {
   });
 });
 
-// ==================== LISTINGS (AUTH SIDE) ====================
+// ========== Listings (Protected) ==========
 
-// Optional: Protected listings (after login)
 router.get("/listings", isLoggedIn, async (req, res) => {
   const allListings = await Listing.find({});
   res.render("listings/index", { allListings, currentUser: req.user });
 });
 
-// ==================== GOOGLE OAUTH ====================
+// ========== Google OAuth ==========
 
-router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/auth/login",
-  }),
+router.get("/google/callback",
+  passport.authenticate("google", { failureRedirect: "/auth/login" }),
   (req, res) => {
     req.session.userId = req.user._id;
     req.session.user = req.user;
-    res.redirect("/listings"); // Can be changed
+    res.redirect("/listings");
   }
 );
 
-// ==================== ADMIN ROUTES ====================
+// ========== Admin Routes ==========
 
-// Admin login
+// Admin Login
 router.post("/admin-login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -112,7 +116,7 @@ router.post("/admin-login", async (req, res) => {
   if (!admin) return res.send("Admin not found or unauthorized.");
 
   const isMatch = await bcrypt.compare(password, admin.password);
-  if (!isMatch) return res.send("Incorrect password.");
+    if (!isMatch) return res.render("auth/login", { error: "Incorrect password." });
 
   req.session.userId = admin._id;
   req.session.user = admin;
@@ -120,7 +124,7 @@ router.post("/admin-login", async (req, res) => {
   res.redirect("/auth/users");
 });
 
-// Admin: View all users
+// Admin - View All Users
 router.get("/users", isAdmin, async (req, res) => {
   try {
     const users = await User.find({});
@@ -131,7 +135,7 @@ router.get("/users", isAdmin, async (req, res) => {
   }
 });
 
-// Admin: Delete user
+// Admin - Delete User
 router.delete("/users/:id", isAdmin, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
