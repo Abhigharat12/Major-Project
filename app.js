@@ -16,12 +16,27 @@ require("./config/passport");
 const authRoutes = require("./routes/auth");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError");
-const { listingSchema,reviewSchema } = require("./schema.js");
+const { listingSchema, reviewSchema } = require("./schema.js");
 const Review = require("./models/review.js");
+const flash = require("connect-flash");
 
+const sessionOptions = {
+  secret: "mysupersecretecode",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  }
+
+};
+
+app.use(session(sessionOptions));
+app.use(flash());
 
 mongoose.connect(process.env.MONGO_URL)
-  .then(() => console.log(" Connected to MongoDB"))
+  .then(() => console.log("Abhi you are Connected to MongoDB"))
   .catch((err) => console.log("❌ MongoDB Error:", err));
 
 app.engine("ejs", ejsMate);
@@ -42,6 +57,13 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use((req, res, next) => {
+  res.locals.success =req.flash("success");
+  res.locals.error =req.flash("error");
+
+  next();
+});
 
 app.use((req, res, next) => {
   res.locals.currentUser = req.user || null;
@@ -104,13 +126,15 @@ app.post("/listings", isLoggedIn, validateListing, wrapAsync(async (req, res) =>
     throw new ExpressError(400, "Send valid data for listing");
   }
   await newListing.save();
+  req.flash("success", "New Listing Created!");
   res.redirect("/listings");
 }));
 
 app.get("/listings/:id", wrapAsync(async (req, res) => {
   const listing = await Listing.findById(req.params.id).populate("reviews"); // ✅ populate reviews
   if (!listing) {
-    throw new ExpressError("Listing not found", 404);
+    req.flash("error","Listing you requested for does not exist!");
+    return res.redirect("/listings");
   }
   res.render("listings/show", { listing });
 }));
@@ -118,8 +142,9 @@ app.get("/listings/:id", wrapAsync(async (req, res) => {
 
 app.get("/listings/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
   const listing = await Listing.findById(req.params.id);
-  if (!listing) {
-    throw new ExpressError("Listing not found", 404);
+   if (!listing) {
+    req.flash("error","Listing you requested for does not exist!");
+    return res.redirect("/listings");
   }
   res.render("listings/edit", { listing });
 }));
@@ -130,12 +155,16 @@ app.put("/listings/:id", isLoggedIn, validateListing, wrapAsync(async (req, res)
   }
   const { id } = req.params;
   await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    req.flash("success", "Listing Updated!");
+
   res.redirect(`/listings/${id}`);
 }));
 
 app.delete("/listings/:id", isLoggedIn, wrapAsync(async (req, res) => {
   const { id } = req.params;
   await Listing.findByIdAndDelete(id);
+    req.flash("success", "Listing Deleted!");
+
   res.redirect("/listings");
 }));
 
@@ -151,18 +180,22 @@ app.post("/listings/:id/reviews", isLoggedIn, validateReview, wrapAsync(async (r
 
   listing.reviews.push(review);
   await listing.save();
+    req.flash("success", "New Review Created!");
+
 
   res.redirect(`/listings/${id}`);
 }));
 
 app.delete("/listings/:id/reviews/:reviewId", isLoggedIn, wrapAsync(async (req, res) => {
   const { id, reviewId } = req.params;
-  
+
   // Remove review reference from listing
   await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
 
   // Delete the review document
   await Review.findByIdAndDelete(reviewId);
+    req.flash("success", "Review Deleted!");
+
 
   res.redirect(`/listings/${id}`);
 }));
