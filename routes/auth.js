@@ -11,7 +11,7 @@ const { isLoggedIn , isAdmin } = require("../middleware"); // adjust path if nee
 
 // Login Page
 router.get("/login", (req, res) => {
-    console.log("➡️ Login Page Reached. returnTo:", req.session.returnTo);
+    // console.log("➡️ Login Page Reached. returnTo:", req.session.returnTo);
 
   res.render("auth/login"); // views/auth/login.ejs
 });
@@ -40,7 +40,7 @@ router.post("/register", async (req, res, next) => {
   if (err) return next(err);
 
   const redirectUrl = req.session.returnTo || "/listings";
-  console.log("🔁 Redirecting to:", redirectUrl);
+  // console.log("🔁 Redirecting to:", redirectUrl);
 
   req.session.save(() => {
     delete req.session.returnTo;

@@ -15,11 +15,9 @@ const passport = require("passport");
 require("./config/passport");
 const authRoutes = require("./routes/auth");
 const wrapAsync = require("./utils/wrapAsync.js");
-const ExpressError = require("./utils/ExpressError");
-const { listingSchema, reviewSchema } = require("./schema.js");
 const Review = require("./models/review.js");
 const flash = require("connect-flash");
-const { isLoggedIn, isAdmin } = require("./middleware.js");
+const { isLoggedIn, isAdmin, isOwner, validateListing, validateReview } = require("./middleware.js");
 
 
 const sessionOptions = {
@@ -68,26 +66,6 @@ app.use((req, res, next) => {
 app.use("/auth", authRoutes);
 
 
-
-const validateListing = (req, res, next) => {
-  const { error } = listingSchema.validate(req.body, { abortEarly: false });
-
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(", ");
-    throw new ExpressError(msg, 400);
-  }
-
-  next();
-};
-const validateReview = (req, res, next) => {
-  const { error } = reviewSchema.validate(req.body, { abortEarly: false });
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(", ");
-    throw new ExpressError(msg, 400);
-  }
-  next();
-};
-
 app.get("/", wrapAsync(async (req, res) => {
   const allListings = await Listing.find({});
   res.render("listings/index", { allListings });
@@ -112,6 +90,7 @@ app.get("/listings/new", isLoggedIn, (req, res) => {
 
 app.post("/listings", isLoggedIn, validateListing, wrapAsync(async (req, res) => {
   const newListing = new Listing(req.body.listing);
+newListing.owner =req.user._id;
   if (!req.body.listing) {
     throw new ExpressError(400, "Send valid data for listing");
   }
@@ -122,6 +101,7 @@ app.post("/listings", isLoggedIn, validateListing, wrapAsync(async (req, res) =>
 
 app.get("/listings/:id", wrapAsync(async (req, res) => {
 const listing = await Listing.findById(req.params.id)
+  .populate("owner")
   .populate({
     path: "reviews",
     populate: {
@@ -129,18 +109,16 @@ const listing = await Listing.findById(req.params.id)
       select: "username"
     }
   });
-
-
-
   if (!listing) {
     req.flash("error","Listing you requested for does not exist!");
     return res.redirect("/listings");
   }
   res.render("listings/show", { listing });
+
 }));
 
 
-app.get("/listings/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
+app.get("/listings/:id/edit", isLoggedIn, isOwner, wrapAsync(async (req, res) => {
   const listing = await Listing.findById(req.params.id);
    if (!listing) {
     req.flash("error","Listing you requested for does not exist!");
@@ -148,19 +126,18 @@ app.get("/listings/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
   }
   res.render("listings/edit", { listing });
 }));
-
-app.put("/listings/:id", isLoggedIn, validateListing, wrapAsync(async (req, res) => {
+//  Update route
+app.put("/listings/:id", isLoggedIn,isOwner,validateListing, wrapAsync(async (req, res) => {
   if (!req.body.listing) {
     throw new ExpressError(400, "Send valid data for listing");
   }
   const { id } = req.params;
   await Listing.findByIdAndUpdate(id, { ...req.body.listing });
     req.flash("success", "Listing Updated!");
-
   res.redirect(`/listings/${id}`);
 }));
 
-app.delete("/listings/:id", isLoggedIn, wrapAsync(async (req, res) => {
+app.delete("/listings/:id", isLoggedIn,isOwner, wrapAsync(async (req, res) => {
   const { id } = req.params;
   await Listing.findByIdAndDelete(id);
     req.flash("success", "Listing Deleted!");
