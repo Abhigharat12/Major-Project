@@ -1,18 +1,13 @@
 <!-- currently not in use we are redirecting to login not register  -->
 
 <h1>Sign Up</h1>
-<form action="/auth/register" method="POST">
-  <label>Email:</label>
-  <input type="email" name="email" required><br>
+<form method="POST" action="/auth/register">
+    <input type="text" name="username" placeholder="Username" required pattern="^[a-zA-Z0-9_]{3,20}$" title="Username should be 3-20 characters, letters, numbers or underscores">
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="text" name="phone" placeholder="Phone (optional)" pattern="^\d{10}$" title="Enter a 10-digit phone number">
+    <input type="password" name="password" placeholder="Password" required minlength="6">
 
-  <label>Phone:</label>
-  <input type="text" name="phone"><br>
-
-  <label>Password:</label>
-  <input type="password" name="password" required><br>
-
-  <button type="submit">Sign Up</button>
-</form>
-
+    <button class="submit-btn" type="submit">Sign Up</button>
+  </form>
 
 

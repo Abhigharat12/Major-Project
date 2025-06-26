@@ -31,6 +31,7 @@ const listingSchema = new Schema({
       ref: "Review"
     }
   ],
+
 });
 
 // ✅ Cascade delete reviews when listing is deleted

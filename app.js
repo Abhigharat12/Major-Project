@@ -19,6 +19,8 @@ const ExpressError = require("./utils/ExpressError");
 const { listingSchema, reviewSchema } = require("./schema.js");
 const Review = require("./models/review.js");
 const flash = require("connect-flash");
+const { isLoggedIn, isAdmin } = require("./middleware.js");
+
 
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "keyboard cat",
@@ -65,13 +67,6 @@ app.use((req, res, next) => {
 
 app.use("/auth", authRoutes);
 
-function isLoggedIn(req, res, next) {
-  if (!req.isAuthenticated()) {
-    req.flash("error", "You must be logged in!");
-    return res.redirect("/auth/login");
-  }
-  next();
-}
 
 
 const validateListing = (req, res, next) => {
@@ -126,7 +121,17 @@ app.post("/listings", isLoggedIn, validateListing, wrapAsync(async (req, res) =>
 }));
 
 app.get("/listings/:id", wrapAsync(async (req, res) => {
-  const listing = await Listing.findById(req.params.id).populate("reviews"); // ✅ populate reviews
+const listing = await Listing.findById(req.params.id)
+  .populate({
+    path: "reviews",
+    populate: {
+      path: "author",
+      select: "username"
+    }
+  });
+
+
+
   if (!listing) {
     req.flash("error","Listing you requested for does not exist!");
     return res.redirect("/listings");
@@ -171,15 +176,19 @@ app.post("/listings/:id/reviews", isLoggedIn, validateReview, wrapAsync(async (r
   if (!listing) throw new ExpressError("Listing not found", 404);
 
   const review = new Review(req.body.review);
+
+  // ✅ Set the author to the logged-in user
+  review.author = req.user._id; // or req.user._id if using passport
+
   await review.save();
 
   listing.reviews.push(review);
   await listing.save();
-    req.flash("success", "New Review Created!");
 
-
+  req.flash("success", "New Review Created!");
   res.redirect(`/listings/${id}`);
 }));
+
 
 app.delete("/listings/:id/reviews/:reviewId", isLoggedIn, wrapAsync(async (req, res) => {
   const { id, reviewId } = req.params;
