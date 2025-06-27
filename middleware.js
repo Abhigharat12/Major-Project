@@ -1,4 +1,5 @@
 const Listing = require("./models/listing");
+const Review = require("./models/review.js");
 const ExpressError = require("./utils/ExpressError");
 const { listingSchema, reviewSchema } = require("./schema.js");
 
@@ -46,6 +47,18 @@ const isOwner = async (req, res, next) => {
   next();
 };
 
+const isReviewAuthor = async (req, res, next) => {
+  const { id, reviewId } = req.params;
+  const review = await Review.findById(reviewId).populate("author");
+
+  if (!review.author.equals(req.user._id)) {
+  req.flash("error", "Oops! You can only delete your own review.");
+    return res.redirect(`/listings/${id}`);
+  }
+
+  next();
+};
+
 // =======================
 // ✅ Validation Middleware
 // =======================
@@ -80,6 +93,7 @@ module.exports = {
   isLoggedIn,
   isAdmin,
   isOwner,
+  isReviewAuthor,
   validateListing,
   validateReview
 };

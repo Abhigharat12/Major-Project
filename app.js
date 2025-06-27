@@ -17,7 +17,7 @@ const authRoutes = require("./routes/auth");
 const wrapAsync = require("./utils/wrapAsync.js");
 const Review = require("./models/review.js");
 const flash = require("connect-flash");
-const { isLoggedIn, isAdmin, isOwner, validateListing, validateReview } = require("./middleware.js");
+const { isLoggedIn, isAdmin, isOwner, isReviewAuthor, validateListing, validateReview } = require("./middleware.js");
 
 
 const sessionOptions = {
@@ -167,7 +167,7 @@ app.post("/listings/:id/reviews", isLoggedIn, validateReview, wrapAsync(async (r
 }));
 
 
-app.delete("/listings/:id/reviews/:reviewId", isLoggedIn, wrapAsync(async (req, res) => {
+app.delete("/listings/:id/reviews/:reviewId", isLoggedIn,isReviewAuthor, wrapAsync(async (req, res) => {
   const { id, reviewId } = req.params;
 
   // Remove review reference from listing
