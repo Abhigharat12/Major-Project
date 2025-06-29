@@ -266,6 +266,14 @@ body {
   box-shadow: 0 6px 20px rgba(255, 110, 110, 0.5);
 }
 
+/* Responsive rating size for small screens */
+@media (max-width: 576px) {
+  .starability-heart label {
+    font-size: 1.5rem;
+  }
+}
+
+
 
 
 
