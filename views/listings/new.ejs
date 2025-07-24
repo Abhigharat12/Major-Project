@@ -12,7 +12,7 @@ background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b
       <div class="col-md-8 col-lg-7 shadow p-4 rounded-4 bg-light mb-5">
         <h3 class="mb-4 text-center">📝 Create a New Listing</h3>
 
-        <form method="POST" action="/listings" class="needs-validation" novalidate>
+        <form method="POST" action="/listings" class="needs-validation" novalidate enctype="multipart/form-data">
           <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <input id="title" name="listing[title]" type="text" class="form-control" required placeholder="Enter title">
@@ -26,8 +26,8 @@ background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b
           </div>
 
           <div class="mb-3">
-            <label for="image" class="form-label">Image URL</label>
-            <input id="image" name="listing[image]" type="text" class="form-control" placeholder="Enter image URL">
+            <label for="image" class="form-label">Upload Image</label>
+            <input id="image" name="listing[image]" type="file" class="form-control" placeholder="Choose image to upload">
             <div class="invalid-feedback"></div>
 
           </div>

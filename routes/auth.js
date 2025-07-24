@@ -11,6 +11,9 @@ router.get("/login", authController.renderLogin);
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.post("/logout", authController.logout);
+router.get("/register", (req, res) => {
+  res.render("auth/register"); // 👈 this is what was missing
+});
 
 // ===== Google OAuth =====
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));

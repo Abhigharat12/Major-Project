@@ -1,5 +1,10 @@
 // ======== app.js ========
-require("dotenv").config();
+
+if(process.env.NODE_ENV !="production")
+{
+  require("dotenv").config();
+
+}
 
 const express = require("express");
 const app = express();
@@ -11,6 +16,10 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const passport = require("passport");
 const flash = require("connect-flash");
+const multer  = require('multer');
+const {storage} =require("./cloudConfig.js");
+const upload = multer({ storage });
+
 
 const Listing = require("./models/listing");
 const User = require("./models/user");
@@ -67,6 +76,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Flash messages & user context
+// Make currentUser and currentRoute available to all views
+app.use((req, res, next) => {
+  res.locals.currentUser = req.user || null;
+  res.locals.currentRoute = req.path;
+  next();
+});
+
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
@@ -81,10 +97,13 @@ app.use("/auth", authRoutes);
 app.get("/", wrapAsync(listingController.index));
 app.get("/listings", wrapAsync(listingController.index));
 app.get("/listings/new", isLoggedIn, listingController.renderNewForm);
-app.post("/listings", isLoggedIn, validateListing, wrapAsync(listingController.createListing));
+app.post("/listings", isLoggedIn, validateListing, upload.single('listing[image]'),  wrapAsync(listingController.createListing));
+
+
+
 app.get("/listings/:id", wrapAsync(listingController.showListing));
 app.get("/listings/:id/edit", isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
-app.put("/listings/:id", isLoggedIn, isOwner, validateListing, wrapAsync(listingController.updateListing));
+app.put("/listings/:id", isLoggedIn, isOwner,upload.single('listing[image]'), validateListing, wrapAsync(listingController.updateListing));
 app.delete("/listings/:id", isLoggedIn, isOwner, wrapAsync(listingController.deleteListing));
 
 // Admin user list

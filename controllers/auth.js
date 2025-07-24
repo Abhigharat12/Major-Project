@@ -7,21 +7,40 @@ module.exports.renderLogin = (req, res) => {
   res.render("auth/login");
 };
 
+
 module.exports.register = async (req, res, next) => {
   try {
-    const { username, email, phone, password } = req.body;
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    let { username, email, phone, password } = req.body;
+
+    username = username.trim();
+    email = email.toLowerCase().trim();
+    phone = phone?.trim() || null;
+
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+
     if (existingUser) {
-      return res.render("auth/login", { error: "Email or username already exists." });
+      return res.render("auth/register", {
+        error: "Email or username already exists.",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.render("auth/register", {
+        error: "Password must be at least 6 characters.",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+
     const user = new User({
       username,
       email,
-      phone: phone?.trim() || null,
+      phone,
       password: hashedPassword,
     });
+
     await user.save();
 
     req.login(user, (err) => {
@@ -34,7 +53,9 @@ module.exports.register = async (req, res, next) => {
     });
   } catch (err) {
     console.error(err);
-    next(err);
+    res.render("auth/register", {
+      error: "Something went wrong. Please try again.",
+    });
   }
 };
 
