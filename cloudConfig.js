@@ -11,7 +11,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'feel-alive_DEV',
-    allowed_formats: ['png', 'jpg', 'jpeg'], // ✅ Fix: `allowed_formats` not `allowedformat`
+    allowed_formats: ['png', 'jpg', 'jpeg'],
   }
 });
 

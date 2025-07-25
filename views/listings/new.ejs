@@ -1,7 +1,7 @@
 <% layout('/layouts/boilerplate.ejs') -%>
 
 <body style="
-background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80');
+  background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -13,25 +13,55 @@ background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b
         <h3 class="mb-4 text-center">📝 Create a New Listing</h3>
 
         <form method="POST" action="/listings" class="needs-validation" novalidate enctype="multipart/form-data">
+          
+          <!-- Title -->
           <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <input id="title" name="listing[title]" type="text" class="form-control" required placeholder="Enter title">
             <div class="valid-feedback">Looks Great!</div>
           </div>
 
+          <!-- Description -->
           <div class="mb-3">
             <label for="description" class="form-label">Description</label>
             <textarea id="description" name="listing[description]" class="form-control" rows="3" required placeholder="Enter description"></textarea>
             <div class="invalid-feedback">Please provide a short description.</div>
           </div>
 
-          <div class="mb-3">
-            <label for="image" class="form-label">Upload Image</label>
-            <input id="image" name="listing[image]" type="file" class="form-control" placeholder="Choose image to upload">
-            <div class="invalid-feedback"></div>
-
+          
+          <!-- Type Dropdown -->
+          <div class="mb-4">
+            <label for="type" class="form-label">Category Type</label>
+            <select id="type" name="listing[type]" class="form-select" required>
+              <option value="" disabled selected>Select category</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Beach">Beach</option>
+              <option value="Mountain">Mountain</option>
+              <option value="City">City</option>
+              <option value="Historical">Historical</option>
+              <option value="Luxury">Luxury</option>
+              <option value="Rural">Rural</option>
+              <option value="Camping">Camping</option>
+              <option value="Cultural">Cultural</option>
+              <option value="Desert">Desert</option>
+            </select>
+            <div class="invalid-feedback">Please select a category type.</div>
           </div>
 
+          <!-- Image Upload -->
+         <!-- Image Upload -->
+<div class="mb-3">
+  <label for="image" class="form-label">Upload Image</label>
+  <input id="image" name="listing[image]" type="file" class="form-control" onchange="previewImage()" accept="image/*">
+</div>
+
+<div class="col-md-6 img-wrapper mb-4">
+  <h6>New Image Preview</h6>
+  <img id="imagePreview" class="img-thumbnail image-preview d-none" alt="New Preview" />
+</div>
+
+
+          <!-- Price + Country -->
           <div class="row">
             <div class="col-md-5 mb-3">
               <label for="price" class="form-label">Price</label>
@@ -46,12 +76,14 @@ background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b
             </div>
           </div>
 
-          <div class="mb-4">
+          <!-- Location -->
+          <div class="mb-3">
             <label for="location" class="form-label">Location</label>
             <input id="location" name="listing[location]" type="text" class="form-control" required placeholder="Enter location">
             <div class="invalid-feedback">Please provide a location.</div>
           </div>
 
+          <!-- Submit Button -->
           <div class="d-grid">
             <button type="submit" class="btn btn-success btn-lg">➕ Add Listing</button>
           </div>
@@ -59,4 +91,20 @@ background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b
       </div>
     </div>
   </div>
-</div>
+  <script>
+  function previewImage() {
+    const input = document.getElementById("image");
+    const imagePreview = document.getElementById("imagePreview");
+
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        imagePreview.src = e.target.result;
+        imagePreview.classList.remove('d-none');
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+
+</body>

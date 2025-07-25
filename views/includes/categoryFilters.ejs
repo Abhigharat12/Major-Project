@@ -1,0 +1,65 @@
+<!-- Category Filter Bar -->
+<div class="category-bar bg-white rounded shadow-sm py-2 px-3 mb-4">
+  <div class="category-scroll d-flex flex-nowrap overflow-auto gap-3">
+    <% const categories = [
+      { name: "Adventure", icon: "fa-hiking", color: "text-danger" },
+      { name: "Beach", icon: "fa-umbrella-beach", color: "text-primary" },
+      { name: "Mountain", icon: "fa-mountain", color: "text-success" },
+      { name: "City", icon: "fa-city", color: "text-secondary" },
+      { name: "Historical", icon: "fa-landmark", color: "text-warning" },
+      { name: "Luxury", icon: "fa-gem", color: "text-info" },
+      { name: "Rural", icon: "fa-tractor", color: "text-success" },
+      { name: "Camping", icon: "fa-campground", color: "text-danger" },
+      { name: "Cultural", icon: "fa-theater-masks", color: "text-dark" },
+      { name: "Desert", icon: "fa-sun", color: "text-warning" }
+    ]; %>
+
+    <% categories.forEach(cat => { %>
+      <form method="GET" action="/listings" class="d-inline">
+        <input type="hidden" name="type" value="<%= cat.name %>">
+        <button
+          class="btn <%= type === cat.name ? 'btn-primary' : 'btn-light' %> border px-3 py-2 d-flex align-items-center gap-2"
+          type="submit"
+        >
+          <i class="fas <%= cat.icon %> <%= cat.color %>"></i>
+          <span class=""><%= cat.name %></span>
+        </button>
+      </form>
+    <% }); %>
+
+    <% if (type || q) { %>
+      <a href="/listings" class="btn btn-outline-secondary px-3 py-2">Clear</a>
+    <% } %>
+  </div>
+</div>
+
+<!-- Scrollbar Hidden & Smooth Mobile Swipe -->
+<style>
+  .category-scroll {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    padding-bottom: 4px;
+  }
+
+  .category-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-bar {
+    border: 1px solid #e0e0e0;
+  }
+
+  @media (max-width: 768px) {
+    .category-scroll {
+      overflow-x: auto;
+      white-space: nowrap;
+      touch-action: pan-x;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .category-scroll form {
+      flex-shrink: 0;
+    }
+  }
+</style>

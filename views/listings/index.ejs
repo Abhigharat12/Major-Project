@@ -1,32 +1,125 @@
 <% layout('/layouts/boilerplate.ejs') -%>
+<%- include("../includes/categoryFilters") %>
 
-<body>
-  <h3>All Listings</h3>
 
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<body class="container my-4">
+
+  <!-- Category Filters -->
+  
+
+  <!-- Info Alert -->
+  <% if (type || q) { %>
+    <div class="alert alert-info">
+      Showing results
+      <% if (type) { %> for <strong><%= type %></strong><% } %>
+      <% if (q) { %> matching "<strong><%= q %></strong>"<% } %>
+    </div>
+  <% } %>
+
+  <!-- Add New Listing Button -->
   <% if (currentUser) { %>
     <form method="GET" action="/listings/new" class="mb-4">
-      <button type="submit" class="btn btn-primary">+ Add New Listing</button>
+      <button type="submit" class="btn btn-success">+ Add New Listing</button>
     </form>
   <% } %>
 
-  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
-    <% for (let listing of allListings) { %>
-      <div class="col">
-        <a href="/listings/<%= listing._id %>" class="card-link">
-          <div class="travel-card card position-relative">
-            <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" style="height: 20rem;">
+  <!-- Listings Grid -->
+  <!-- Listings Grid -->
+<div id="originalListings" class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-1 g-4">
+  <% if (listings.length === 0) { %>
+    <p class="text-center text-muted">No listings found.</p>
+  <% } %>
 
+  <% listings.forEach(listing => { %>
+    <div class="col">
+      <a href="/listings/<%= listing._id %>" class="card-link text-decoration-none text-dark">
+        <div class="card travel-card position-relative">
+          <img src="<%= listing.image?.url || '/images/default.jpg' %>" class="card-img-top"
+            style="height: 17rem; object-fit: cover;" alt="<%= listing.title %>" />
+          <div class="card-overlay d-flex flex-column justify-content-center align-items-center">
+            <p class="overlay-text">Explore Now</p>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title"><%= listing.title %></h5>
+            <p class="card-text">&#8377; <%= Number(listing.price).toLocaleString("en-IN") %> / night</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  <% }); %>
+</div>
+
+<div id="searchResults" class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mt-4"></div>
+
+
+<button class="btn btn-outline-secondary mt-3" onclick="window.location.reload()">Reset Search</button>
+
+
+<script id="listings-data" type="application/json">
+  <%- JSON.stringify(listings) %>
+</script>
+
+<!-- Fuse.js -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+
+<script>
+  const listingsData = JSON.parse(document.getElementById('listings-data').textContent);
+
+  const fuse = new Fuse(listingsData, {
+    keys: ['title', 'description', 'location'],
+    threshold: 0.4,
+  });
+
+  const input = document.getElementById('searchInput');
+  const resultsDiv = document.getElementById('searchResults');
+  const originalDiv = document.getElementById('originalListings');
+
+  input?.addEventListener('input', function () {
+    const query = input.value.trim();
+    resultsDiv.innerHTML = '';
+
+    if (!query) {
+  originalDiv.style.display = '';
+  resultsDiv.innerHTML = '';
+  return;
+}
+
+
+    const results = fuse.search(query);
+    originalDiv.style.display = 'none';
+
+    if (results.length === 0) {
+      resultsDiv.innerHTML = '<p class="text-danger">No listings found.</p>';
+      return;
+    }
+
+    results.forEach(({ item }) => {
+      const card = document.createElement('div');
+      card.className = 'col';
+      card.innerHTML = `
+        <a href="/listings/${item._id}" class="card-link text-decoration-none text-dark">
+          <div class="card travel-card position-relative">
+            <img src="${item.image?.url || '/images/default.jpg'}" class="card-img-top"
+              style="height: 20rem; object-fit: cover;" alt="${item.title}" />
             <div class="card-overlay d-flex flex-column justify-content-center align-items-center">
               <p class="overlay-text">Explore Now</p>
             </div>
-
             <div class="card-body">
-              <h5 class="card-title"><%= listing.title %></h5>
-              <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %>/night</p>
+              <h5 class="card-title">${item.title}</h5>
+              <p class="card-text">&#8377; ${Number(item.price).toLocaleString("en-IN")} / night</p>
             </div>
           </div>
         </a>
-      </div>
-    <% } %>
-  </div>
+      `;
+      resultsDiv.appendChild(card);
+    });
+  });
+</script>
+
+
+
+
 </body>

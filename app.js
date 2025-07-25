@@ -94,6 +94,7 @@ app.use((req, res, next) => {
 app.use("/auth", authRoutes);
 
 // Home & Listing Routes
+app.get("/search", wrapAsync(listingController.searchListings));
 app.get("/", wrapAsync(listingController.index));
 app.get("/listings", wrapAsync(listingController.index));
 app.get("/listings/new", isLoggedIn, listingController.renderNewForm);

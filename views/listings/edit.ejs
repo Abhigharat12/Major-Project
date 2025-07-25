@@ -106,6 +106,17 @@
         <textarea name="listing[description]" class="form-control" rows="3" required><%= listing.description %></textarea>
       </div>
 
+      <div class="row mt-4">
+  <label for="type" class="form-label">Category</label>
+  <select id="type" name="listing[type]" class="form-select" required>
+    <% const types = ["Adventure", "Beach", "Mountain", "City", "Historical", "Luxury", "Rural", "Camping", "Cultural", "Desert"]; %>
+    <% types.forEach(t => { %>
+      <option value="<%= t %>" <%= listing.type === t ? 'selected' : '' %>><%= t %></option>
+    <% }); %>
+  </select>
+</div>
+
+
       <div class="mb-3">
         <label for="imageInput" class="form-label">Upload New Image</label>
         <input id="imageInput" name="listing[image]" type="file" class="form-control" accept="image/*" onchange="previewImage()" />

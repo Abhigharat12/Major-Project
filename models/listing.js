@@ -31,6 +31,15 @@ const listingSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref:"User",
   },
+  type: {
+  type: String,
+  enum: [
+    "Adventure", "Beach", "Mountain", "City", "Historical",
+    "Luxury", "Rural", "Camping", "Cultural", "Desert"
+  ],
+  required: true
+}
+
 
 
 });

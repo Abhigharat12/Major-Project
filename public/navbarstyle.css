@@ -1,5 +1,4 @@
 
-<style>
   /* From Uiverse.io by StealthWorm */ 
 .searchbtn {
   display: flex;
@@ -177,75 +176,3 @@ strong {
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
-
-</style>
-<!-- Fuse.js for live search -->
-<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
-
-<nav class="navbar navbar-expand-md bg-light border-bottom sticky-top shadow-sm" style="z-index: 1050;">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="/">
-      <i class="fa-regular fa-compass"></i> FeelAlive
-    </a>
-
-    <!-- Hamburger/Close toggle -->
-    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <!-- Collapsible Navbar -->
-    <div class="collapse navbar-collapse bg-light mt-2 mt-md-0 p-3 p-md-0" id="navbarNav">
-      <ul class="navbar-nav me-auto mb-2 mb-md-0">
-        <li class="nav-item">
-          <a class="nav-link <%= currentRoute === '/' ? 'active fw-semibold text-primary' : '' %>" href="/">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= currentRoute === '/listings' ? 'active fw-semibold text-primary' : '' %>" href="/listings">All Listings</a>
-        </li>
-        <% if (currentUser) { %>
-          <li class="nav-item">
-            <a class="nav-link <%= currentRoute === '/listings/new' ? 'active fw-semibold text-primary' : '' %>" href="/listings/new">Add New Listing</a>
-          </li>
-        <% } %>
-      </ul>
-
-     <% if (currentRoute === '/' || currentRoute === '/listings') { %>
-  <!-- Search form -->
-  <div class="d-flex justify-content-center align-items-center w-100 my-2 my-md-0">
-    <form class="d-flex align-items-center" onsubmit="return false;" style="gap: 0.5rem;">
-      <input class="form-control me-2" id="searchInput" type="search" placeholder="Search listings..." aria-label="Search">
-      <button type="submit" class="searchbtn" id="searchBtn">
-        <div id="glow">
-          <div class="circle"></div>
-          <div class="circle"></div>
-        </div>
-        <div id="container-stars">
-          <div id="stars"></div>
-        </div>
-        <strong>SEARCH</strong>
-      </button>
-    </form>
-  </div>
-<% } %>
-
-
-      <ul class="navbar-nav">
-        <% if (currentUser) { %>
-          <li class="nav-item">
-            <form action="/auth/logout" method="POST" class="d-inline">
-              <button class="btn nav-link text-danger fw-semibold">Logout</button>
-            </form>
-          </li>
-        <% } else { %>
-          <li class="nav-item">
-            <a class="nav-link <%= currentRoute === '/auth/login' ? 'active fw-semibold text-primary' : '' %>" href="/auth/login">Login</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link <%= currentRoute === '/auth/register' ? 'active fw-semibold text-primary' : '' %>" href="/auth/register">Sign Up</a>
-          </li>
-        <% } %>
-      </ul>
-    </div>
-  </div>
-</nav>
