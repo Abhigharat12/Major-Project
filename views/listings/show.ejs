@@ -187,105 +187,173 @@
 
  <hr>
  <!-- maps div  -->
-    <h3>Location for <%= listing.title %></h3>
-    <div id="map"></div>
-    <div id="directions-container">
-      <button id="get-route-btn" class="btn btn-primary mb-2">Show Street Route</button>
-      <div id="directions-output" style="max-height: 200px; overflow-y: auto;"></div>
+<h3 class="mt-4">Location for <%= listing.title %></h3>
+
+<div id="map" style="height: 400px;" class="rounded shadow-sm mb-3"></div>
+
+<div class="d-flex align-items-center flex-wrap gap-2 my-3">
+  <label for="transport-mode" class="form-label mb-0 fw-semibold">Select Mode:</label>
+  <select id="transport-mode" class="form-select form-select-sm w-auto">
+    <option value="driving-car">Driving</option>
+    <option value="cycling-regular">Cycling</option>
+    <option value="foot-walking">Walking</option>
+  </select>
+
+  <button id="get-route-btn" class="btn btn-sm btn-primary ms-2">Get Directions</button>
+  <div id="directions-output" class="border p-3 rounded bg-light" style="max-height: 300px; overflow-y: auto;"></div>
+
+  </div>
+
+
+
+
+  
+<script>
+  const MAPTILER_KEY = "<%= process.env.MAPTILER_KEY %>";
+  const ORS_KEY = "<%= process.env.ORS_API_KEY %>";
+  const listingTitle = "<%= listing.title %>";
+  const listingAddress = "<%= listing.location %>";
+  let map, listingCoords;
+
+  // Fetch listing coordinates using MapTiler Geocoding
+  fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(listingAddress)}.json?key=${MAPTILER_KEY}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.features.length) throw new Error("Location not found");
+      listingCoords = data.features[0].center;
+
+      map = new maplibregl.Map({
+        container: 'map',
+        style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`,
+        center: listingCoords,
+        zoom: 13
+      });
+
+      map.addControl(new maplibregl.NavigationControl());
+      map.addControl(new maplibregl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true,
+        showUserHeading: true
+      }));
+
+      new maplibregl.Marker({ color: 'tomato' })
+        .setLngLat(listingCoords)
+        .setPopup(
+          new maplibregl.Popup({ offset: 25 })
+            .setHTML(`<strong>${listingTitle}</strong><br><em>You will be here</em>`)
+        )
+        .addTo(map);
+    })
+    .catch(err => {
+      console.error("Map error:", err.message);
+      alert("Failed to load map: " + err.message);
+    });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById("get-route-btn");
+    const outputDiv = document.getElementById("directions-output");
+
+    if (!btn) return;
+
+    btn.addEventListener("click", () => {
+  if (!navigator.geolocation) return alert("Geolocation not supported");
+
+  const selectedMode = document.getElementById("transport-mode").value;
+
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const userCoords = [position.coords.longitude, position.coords.latitude];
+    if (!listingCoords) return alert("Listing coordinates not available");
+
+    // Add user marker
+    new maplibregl.Marker({ color: 'blue' })
+      .setLngLat(userCoords)
+      .setPopup(new maplibregl.Popup().setText("You are here"))
+      .addTo(map);
+
+    try {
+      const response = await fetch("/api/route", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ start: userCoords, end: listingCoords, mode: selectedMode })
+      });
+
+      const data = await response.json();
+      if (!data || !data.features) throw new Error("No route found");
+
+      // Remove existing route if present
+      if (map.getLayer('route')) map.removeLayer('route');
+      if (map.getSource('route')) map.removeSource('route');
+
+      map.addSource('route', {
+        type: 'geojson',
+        data
+      });
+
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#007bff', 'line-width': 4 }
+      });
+
+      const segment = data.features[0]?.properties?.segments?.[0];
+      const steps = segment?.steps || [];
+
+      const distance = segment?.distance ? (segment.distance / 1000).toFixed(2) + " km" : "N/A";
+      const duration = segment?.duration ? (segment.duration / 60).toFixed(1) + " mins" : "N/A";
+
+     const directionsHTML = `
+  <div class="mb-3">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <span class="badge bg-primary px-3 py-2">
+        <strong>Distance:</strong> ${distance}
+      </span>
+      <span class="badge bg-success px-3 py-2">
+        <strong>Time:</strong> ${duration}
+      </span>
     </div>
   </div>
 
-  <!-- JavaScript for Map and Route -->
-  <script>
-    const MAPTILER_KEY = "<%= process.env.MAPTILER_KEY %>";
-    const ORS_KEY = "<%= process.env.ORS_KEY %>";
-    const listingTitle = "<%= listing.title %>";
-    const listingAddress = "<%= listing.location %>";
-    let map, listingCoords;
+  <hr class="my-3">
 
-    fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(listingAddress)}.json?key=${MAPTILER_KEY}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.features.length) throw new Error("Location not found");
-        listingCoords = data.features[0].center;
+  <h5 class="fw-semibold">Step-by-step Directions:</h5>
+  <ol class="ps-3 mt-2">
+    ${
+      steps.length
+        ? steps.map(step => `<li class="mb-1">${step.instruction}</li>`).join("")
+        : "<p class='text-muted'>No directions available.</p>"
+    }
+  </ol>
+`;
 
-        map = new maplibregl.Map({
-          container: 'map',
-          style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`,
-          center: listingCoords,
-          zoom: 12
-        });
 
-        map.addControl(new maplibregl.NavigationControl());
-        map.addControl(new maplibregl.GeolocateControl({
-          positionOptions: { enableHighAccuracy: true },
-          trackUserLocation: true,
-          showUserHeading: true
-        }));
+      outputDiv.innerHTML = directionsHTML;
 
-        const marker = new maplibregl.Marker({ color: 'tomato' })
-  .setLngLat(listingCoords)
-  .setPopup(
-    new maplibregl.Popup({ offset: 25 }) // optional offset
-      .setHTML(`<strong>${listingTitle}</strong><br><em>You will be here</em>`)
-  )
-  .addTo(map);
+    } catch (err) {
+      console.error("Routing error:", err.message);
+      outputDiv.innerHTML = `<p class="text-danger">Error fetching route. Try a different mode.</p>`;
+    }
+  }, () => {
+    alert("Failed to get your current location.");
+  });
+});
 
-// Show the popup immediately
+  });
 
-      });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById("get-route-btn");
-      btn.addEventListener("click", () => {
-        if (!navigator.geolocation) return alert("Geolocation not supported");
-
-        navigator.geolocation.getCurrentPosition(position => {
-          const userCoords = [position.coords.longitude, position.coords.latitude];
-
-          new maplibregl.Marker({ color: 'blue' })
-            .setLngLat(userCoords)
-            .setPopup(new maplibregl.Popup().setText("You are here"))
-            .addTo(map);
-
-          fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": ORS_KEY
-            },
-            body: JSON.stringify({ coordinates: [userCoords, listingCoords] })
-          })
-            .then(res => res.json())
-            .then(route => {
-              if (map.getSource('route')) map.removeSource('route');
-              if (map.getLayer('route')) map.removeLayer('route');
-
-              map.addSource('route', {
-                type: 'geojson',
-                data: route
-              });
-
-              map.addLayer({
-                id: 'route',
-                type: 'line',
-                source: 'route',
-                layout: {
-                  'line-cap': 'round',
-                  'line-join': 'round'
-                },
-                paint: {
-                  'line-color': '#007bff',
-                  'line-width': 4
-                }
-              });
-
-              const outputDiv = document.getElementById("directions-output");
-              const steps = route.features[0].properties.segments[0].steps;
-              outputDiv.innerHTML = steps.map(step => `<p>${step.instruction}</p>`).join("");
-            });
-        });
-      });
+  async function getRoute(start, end, mode) {
+    const response = await fetch("/api/route", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ start, end, mode })
     });
-  </script>
+
+    const data = await response.json();
+    if (data && data.features) return data;
+    else throw new Error("No route found");
+  }
+</script>
+
+
+
 </body>

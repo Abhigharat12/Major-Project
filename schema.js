@@ -19,6 +19,7 @@ const listingSchema = Joi.object({
     country: Joi.string().required().messages({
       "string.empty": "Country is required",
     }),
+    type: Joi.string().required(),
   }).required(),
 });
 

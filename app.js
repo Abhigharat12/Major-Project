@@ -19,6 +19,9 @@ const flash = require("connect-flash");
 const multer  = require('multer');
 const {storage} =require("./cloudConfig.js");
 const upload = multer({ storage });
+const apiRoutes = require("./routes/api.js");
+
+
 
 
 const Listing = require("./models/listing");
@@ -68,12 +71,15 @@ mongoose.connect(process.env.MONGO_URL)
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.json());
+app.use("/api", apiRoutes);
+app.use(express.static("public"));
 
 // Flash messages & user context
 // Make currentUser and currentRoute available to all views

@@ -274,6 +274,15 @@ body {
 }
 
 
+/* maps */
+
+#directions-output li {
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+
+
 
 
 
