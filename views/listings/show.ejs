@@ -191,18 +191,26 @@
 
 <div id="map" style="height: 400px;" class="rounded shadow-sm mb-3"></div>
 
-<div class="d-flex align-items-center flex-wrap gap-2 my-3">
-  <label for="transport-mode" class="form-label mb-0 fw-semibold">Select Mode:</label>
+<div class="d-flex flex-wrap align-items-center gap-2 my-3">
+  <!-- Label -->
+  <label for="transport-mode" class="form-label fw-semibold mb-0 me-2">Select Mode:</label>
+
+  <!-- Transport Mode Dropdown -->
   <select id="transport-mode" class="form-select form-select-sm w-auto">
     <option value="driving-car">Driving</option>
     <option value="cycling-regular">Cycling</option>
     <option value="foot-walking">Walking</option>
   </select>
 
-  <button id="get-route-btn" class="btn btn-sm btn-primary ms-2">Get Directions</button>
-  <div id="directions-output" class="border p-3 rounded bg-light" style="max-height: 300px; overflow-y: auto;"></div>
+  <!-- Get Route Button -->
+  <button id="get-route-btn" class="btn btn-sm btn-primary">Get Directions</button>
+</div>
 
-  </div>
+<!-- Directions Output Box -->
+<div id="directions-output" class="border rounded bg-light p-3 mb-3" style="max-height: 300px; overflow-y: auto;">
+  <!-- Distance, Duration, and Route will be shown here -->
+</div>
+
 
 
 
@@ -301,19 +309,34 @@
       const steps = segment?.steps || [];
 
       const distance = segment?.distance ? (segment.distance / 1000).toFixed(2) + " km" : "N/A";
-      const duration = segment?.duration ? (segment.duration / 60).toFixed(1) + " mins" : "N/A";
+
+    
+const duration = segment?.duration
+  ? formatDuration(segment.duration)
+  : "N/A";
+
+function formatDuration(seconds) {
+  const minutes = Math.round(seconds / 60);
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hrs > 0) {
+    return `${hrs} hr${hrs > 1 ? 's' : ''} ${mins} min`;
+  }
+  return `${mins} min`;
+}
 
      const directionsHTML = `
-  <div class="mb-3">
-    <div class="d-flex align-items-center gap-3 flex-wrap">
-      <span class="badge bg-primary px-3 py-2">
-        <strong>Distance:</strong> ${distance}
-      </span>
-      <span class="badge bg-success px-3 py-2">
-        <strong>Time:</strong> ${duration}
-      </span>
-    </div>
+<div class="mb-3">
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <span class="badge bg-warning text-black px-3 py-2">
+      <b class="fw-semibold text-black">Distance:</b> ${distance}
+    </span>
+    <span class="badge bg-info text-black px-3 py-2">
+      <b class="fw-semibold text-black">Time:</b> ${duration}
+    </span>
   </div>
+</div>
+
 
   <hr class="my-3">
 
