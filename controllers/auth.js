@@ -106,7 +106,7 @@ module.exports.adminLogin = async (req, res) => {
 module.exports.viewUsers = async (req, res) => {
   try {
     const users = await User.find({});
-    res.render("userList", { users });
+    res.render("userlist", { users });
   } catch (err) {
     console.error(err);
     res.send("Error loading users.");
