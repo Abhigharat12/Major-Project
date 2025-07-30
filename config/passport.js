@@ -10,26 +10,28 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
+      callbackURL: process.env.NODE_ENV === "production"
+        ? "https://feel-alive.onrender.com/auth/google/callback"
+        : "http://localhost:8080/auth/google/callback"
     },
-  async (accessToken, refreshToken, profile, done) => {
-  try {
-    const existingUser = await User.findOne({ googleId: profile.id });
-    if (existingUser) {
-      return done(null, existingUser);
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const existingUser = await User.findOne({ googleId: profile.id });
+        if (existingUser) {
+          return done(null, existingUser);
+        }
+
+        const newUser = new User({
+          email: profile.emails[0].value,
+          googleId: profile.id,
+        });
+
+        await newUser.save();
+        return done(null, newUser);
+      } catch (err) {
+        return done(err, null);
+      }
     }
-
-    const newUser = new User({
-      email: profile.emails[0].value,
-      googleId: profile.id,
-    });
-
-    await newUser.save();
-    return done(null, newUser);
-  } catch (err) {
-    return done(err, null);
-  }
-}
 
   )
 );
