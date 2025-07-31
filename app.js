@@ -49,7 +49,7 @@ const reviewController = require("./controllers/review");
 
 // ================== Session Setup ==================
 const sessionOptions = {
-  secret: process.env.SESSION_SECRET || "keyboard cat",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
@@ -109,7 +109,12 @@ app.post("/listings", isLoggedIn, validateListing, upload.single('listing[image]
 
 
 app.get("/listings/:id", wrapAsync(listingController.showListing));
-app.get("/listings/:id/edit", isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
+app.get(
+  "/listings/:id/edit",
+  isLoggedIn,
+  isOwner, // make sure this has null check as above
+  wrapAsync(listingController.renderEditForm)
+);
 app.put("/listings/:id", isLoggedIn, isOwner,upload.single('listing[image]'), validateListing, wrapAsync(listingController.updateListing));
 app.delete("/listings/:id", isLoggedIn, isOwner, wrapAsync(listingController.deleteListing));
 

@@ -1,0 +1,318 @@
+
+  /* -------------------- Search Button (Uiverse.io) -------------------- */
+  .searchbtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 13rem;
+    height: 3rem;
+    background-size: 300% 300%;
+    cursor: pointer;
+    backdrop-filter: blur(1rem);
+    border-radius: 5rem;
+    transition: 0.5s;
+    animation: gradient_301 5s ease infinite;
+    border: double 4px transparent;
+    background-image: linear-gradient(#212121, #212121),
+      linear-gradient(137.48deg, #ffdb3b 10%, #fe53bb 45%, #8f51ea 67%, #0044ff 87%);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    position: relative;
+  }
+
+  #container-stars {
+    position: absolute;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    backdrop-filter: blur(1rem);
+    border-radius: 5rem;
+  }
+
+  strong {
+    z-index: 2;
+    font-family: "Arial", sans-serif;
+    font-size: 12px;
+    letter-spacing: 5px;
+    color: #ffffff;
+    text-shadow: 0 0 4px white;
+  }
+
+  #glow {
+    position: absolute;
+    display: flex;
+    width: 12rem;
+  }
+
+  .circle {
+    width: 100%;
+    height: 30px;
+    filter: blur(2rem);
+    animation: pulse_3011 4s infinite;
+    z-index: -1;
+  }
+
+  .circle:nth-of-type(1) {
+    background: rgba(254, 83, 186, 0.636);
+  }
+
+  .circle:nth-of-type(2) {
+    background: rgba(142, 81, 234, 0.704);
+  }
+
+  .searchbtn:hover {
+    transform: scale(1.1);
+  }
+
+  .searchbtn:active {
+    border: double 4px #fe53bb;
+    animation: none;
+  }
+
+  .searchbtn:active .circle {
+    background: #fe53bb;
+  }
+
+  #stars {
+    position: relative;
+    width: 200rem;
+    height: 200rem;
+  }
+
+  #stars::after,
+  #stars::before {
+    content: "";
+    position: absolute;
+    background-image: radial-gradient(#ffffff 1px, transparent 1%);
+    background-size: 50px 50px;
+  }
+
+  #stars::after {
+    top: -10rem;
+    left: -100rem;
+    width: 100%;
+    height: 100%;
+    animation: animStarRotate 90s linear infinite;
+  }
+
+  #stars::before {
+    top: 0;
+    left: -50%;
+    width: 170%;
+    height: 500%;
+    animation: animStar 60s linear infinite;
+    opacity: 0.5;
+  }
+
+  @keyframes gradient_301 {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes pulse_3011 {
+    0%, 100% {
+      transform: scale(0.75);
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+  }
+
+  @keyframes animStar {
+    from { transform: translateY(0); }
+    to { transform: translateY(-135rem); }
+  }
+
+  @keyframes animStarRotate {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0); }
+  }
+
+/* ---- Clean Neon Button Style ---- */
+.neon-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1.2rem;
+  background-color: #111;
+  color: white;
+  font-weight: 600;
+  border: 2px solid #1e90ff;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0px transparent;
+}
+
+.neon-btn:hover {
+  color: white;
+  background-color: #111;
+  box-shadow: 0 0 10px #1e90ff, 0 0 20px #1e90ff33;
+  transform: translateY(-1px);
+}
+
+.neon-btn svg {
+  fill: white;
+}
+
+@media (max-width: 576px) {
+  .neon-btn {
+    padding: 0.35rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}
+
+
+
+.home-video-icon,
+.listings-video-icon {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+
+.buttonlogo {
+    background: linear-gradient(to right, #0fa3ed, #3413c5);
+    border: none;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease;
+  }
+
+  .buttonlogo:hover {
+    background: linear-gradient(to right, #193ae0, #08c7d4);
+  }
+
+  .svgIcon {
+    width: 1.2em;
+    height: 1.2em;
+    transition: transform 0.5s ease;
+  }
+
+  .buttonlogo:hover .svgIcon {
+    transform: rotate(180deg);
+  }
+
+  /* From Uiverse.io by kennyotsu-monochromia */ 
+/* From Uiverse.io by kennyotsu-monochromia */ 
+.Btn {
+  --black: #000000;
+  --ch-black: #141414;
+  --eer-black: #1b1b1b;
+  --night-rider: #2e2e2e;
+  --white: #ffffff;
+  --af-white: #f3f3f3;
+  --ch-white: #e1e1e1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 45px;
+  height: 45px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition-duration: .3s;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
+  background-color: var(--night-rider);
+}
+
+/* plus sign */
+.sign {
+  width: 100%;
+  transition-duration: .3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sign svg {
+  width: 17px;
+}
+
+.sign svg path {
+  fill: var(--af-white);
+}
+/* text */
+.text {
+  position: absolute;
+  right: 0%;
+  width: 0%;
+  opacity: 0;
+  color: var(--af-white);
+  font-size: 1.2em;
+  font-weight: 600;
+  transition-duration: .3s;
+}
+/* hover effect on button width */
+.Btn:hover {
+  width: 125px;
+  border-radius: 5px;
+  transition-duration: .3s;
+}
+
+.Btn:hover .sign {
+  width: 30%;
+  transition-duration: .3s;
+  padding-left: 20px;
+}
+/* hover effect button's text */
+.Btn:hover .text {
+  opacity: 1;
+  width: 70%;
+  transition-duration: .3s;
+  padding-right: 10px;
+}
+/* button click effect*/
+.Btn:active {
+  transform: translate(2px ,2px);
+}
+.dropdown-menu {
+  min-width: 180px;
+}
+.user-profile-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.75rem;
+  background-color: #f8f9fa; /* Light background */
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #e60909;
+  transition: all 0.3s ease;
+}
+
+.nav-link.dropdown-toggle:hover .user-profile-inner {
+  background-color: #e2e6ea;
+  color: #d61616;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-profile-inner p {
+  margin: 0;
+  padding: 0.3rem 0.6rem;
+  text-align: center;
+  font-weight: 600;
+  color: red;
+}
+
+  /* 🔽 Responsive fix for mobile */
+  @media (max-width: 576px) {
+    .user-profile-inner {
+      font-size: 0.9rem;
+      padding: 0.3rem 0.6rem;
+    }
+  }

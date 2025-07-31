@@ -74,14 +74,18 @@ module.exports.showListing = async (req, res) => {
   res.render("listings/show", { listing });
 };
 
-module.exports.renderEditForm = async (req, res) => {
-  const listing = await Listing.findById(req.params.id);
+module.exports.renderEditForm = async (req, res, next) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+
   if (!listing) {
-    req.flash("error", "Listing you requested for does not exist!");
+    req.flash("error", "Listing not found!");
     return res.redirect("/listings");
   }
+
   res.render("listings/edit", { listing });
 };
+
 
 module.exports.updateListing = async (req, res) => {
   const { id } = req.params;
