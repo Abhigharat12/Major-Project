@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Review = require("./review"); // ✅ Import is correct
-const { type } = require("os");
+// const { type } = require("os");
 const Schema = mongoose.Schema;
 
 const listingSchema = new Schema({
