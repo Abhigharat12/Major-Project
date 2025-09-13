@@ -28,7 +28,6 @@
             <div class="invalid-feedback">Please provide a short description.</div>
           </div>
 
-          
           <!-- Type Dropdown -->
           <div class="mb-4">
             <label for="type" class="form-label">Category Type</label>
@@ -49,17 +48,20 @@
           </div>
 
           <!-- Image Upload -->
-         <!-- Image Upload -->
-<div class="mb-3">
-  <label for="image" class="form-label">Upload Image</label>
-  <input id="image" name="listing[image]" type="file" class="form-control" onchange="previewImage()" accept="image/*">
-</div>
+          <div class="mb-3">
+            <label for="images" class="form-label">Upload Images</label>
 
-<div class="col-md-6 img-wrapper mb-4">
-  <h6>New Image Preview</h6>
-  <img id="imagePreview" class="img-thumbnail image-preview d-none" alt="New Preview" />
-</div>
+            <!-- File Inputs -->
+            <div id="imageInputs">
+              <input type="file" name="images" class="form-control mb-2" accept="image/*" onchange="previewImage(event)">
+            </div>
 
+            <!-- Add More Button -->
+            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addMoreImages()">+ Add More Images</button>
+          </div>
+
+          <!-- Preview Area -->
+          <div id="previewArea" class="row g-3 mb-3"></div>
 
           <!-- Price + Country -->
           <div class="row">
@@ -91,20 +93,43 @@
       </div>
     </div>
   </div>
+
+  <!-- JS for image upload -->
   <script>
-  function previewImage() {
-    const input = document.getElementById("image");
-    const imagePreview = document.getElementById("imagePreview");
+    function addMoreImages() {
+      const container = document.getElementById("imageInputs");
 
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        imagePreview.src = e.target.result;
-        imagePreview.classList.remove('d-none');
-      };
-      reader.readAsDataURL(input.files[0]);
+      const input = document.createElement("input");
+      input.type = "file";
+      input.name = "images";
+      input.className = "form-control mb-2";
+      input.accept = "image/*";
+      input.onchange = (e) => previewImage(e);
+
+      container.appendChild(input);
     }
-  }
-</script>
 
+    function previewImage(event) {
+      const files = event.target.files;
+      const previewArea = document.getElementById("previewArea");
+
+      [...files].forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const col = document.createElement("div");
+          col.className = "col-md-4";
+
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          img.className = "img-thumbnail shadow-sm";
+          img.style.height = "150px";
+          img.style.objectFit = "cover";
+
+          col.appendChild(img);
+          previewArea.appendChild(col);
+        }
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
 </body>

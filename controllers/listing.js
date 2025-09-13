@@ -1,8 +1,7 @@
-
 const Listing = require("../models/listing");
 const ExpressError = require("../utils/ExpressError");
 
-
+// ---------------- SEARCH ----------------
 module.exports.searchListings = async (req, res) => {
   const { q } = req.query;
   const listings = await Listing.find({
@@ -11,12 +10,13 @@ module.exports.searchListings = async (req, res) => {
   res.render("listings/index", { listings });
 };
 
+// ---------------- INDEX ----------------
 module.exports.index = async (req, res) => {
   const { q, type } = req.query;
   const query = {};
 
   if (q) {
-    const regex = new RegExp(q, 'i'); // case-insensitive
+    const regex = new RegExp(q, 'i'); // case-insensitive search
     query.$or = [
       { title: regex },
       { description: regex },
@@ -30,31 +30,34 @@ module.exports.index = async (req, res) => {
   }
 
   const listings = await Listing.find(query);
-  res.render('listings/index', { listings, q, type });
+  res.render("listings/index", { listings, q, type });
 };
 
-
-
+// ---------------- RENDER NEW ----------------
 module.exports.renderNewForm = (req, res) => {
   res.render("listings/new");
 };
 
+// ---------------- CREATE ----------------
 module.exports.createListing = async (req, res) => {
-  
-const url = req.file.path;        
-const filename = req.file.filename;
-
   if (!req.body.listing) {
     throw new ExpressError(400, "Send valid data for listing");
   }
+
   const newListing = new Listing(req.body.listing);
   newListing.owner = req.user._id;
-  newListing.image ={url,filename};
+
+  // handle multiple images
+  if (req.files && req.files.length > 0) {
+    newListing.image = req.files.map(f => ({ url: f.path, filename: f.filename }));
+  }
+
   await newListing.save();
   req.flash("success", "New Listing Created!");
   res.redirect("/listings");
 };
 
+// ---------------- SHOW ----------------
 module.exports.showListing = async (req, res) => {
   const listing = await Listing.findById(req.params.id)
     .populate("owner")
@@ -74,6 +77,7 @@ module.exports.showListing = async (req, res) => {
   res.render("listings/show", { listing });
 };
 
+// ---------------- RENDER EDIT ----------------
 module.exports.renderEditForm = async (req, res, next) => {
   const { id } = req.params;
   const listing = await Listing.findById(id);
@@ -86,30 +90,45 @@ module.exports.renderEditForm = async (req, res, next) => {
   res.render("listings/edit", { listing });
 };
 
-
+// ---------------- UPDATE ----------------
 module.exports.updateListing = async (req, res) => {
   const { id } = req.params;
 
-  // Validate incoming data
   if (!req.body.listing) {
     throw new ExpressError(400, "Send valid data for listing");
   }
 
-  // Update the listing with new data
-  let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { new: true, runValidators: true });
+  // Update basic fields
+  let listing = await Listing.findByIdAndUpdate(
+    id,
+    { ...req.body.listing },
+    { new: true, runValidators: true }
+  );
 
-  // If image was uploaded, update the image object
-  if (req.file) {
-    const { path: url, filename } = req.file;
-    listing.image = { url, filename };
-    await listing.save(); // Save the updated listing with image
+  // Handle new images
+  if (req.files && req.files.length > 0) {
+    const newImgs = req.files.map(f => ({ url: f.path, filename: f.filename }));
+    listing.image = newImgs;
   }
+
+  // Handle image deletion
+  if (req.body.delete_images) {
+    let imagesToDelete = req.body.delete_images;
+    if (typeof imagesToDelete === 'string') {
+      imagesToDelete = imagesToDelete.split(',');
+    }
+    listing.image = listing.image.filter(
+      (img) => !imagesToDelete.includes(img.filename)
+    );
+  }
+
+  await listing.save();
 
   req.flash("success", "Listing Updated!");
   res.redirect(`/listings/${id}`);
 };
 
-
+// ---------------- DELETE ----------------
 module.exports.deleteListing = async (req, res) => {
   const { id } = req.params;
   await Listing.findByIdAndDelete(id);

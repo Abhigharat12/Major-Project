@@ -9,10 +9,12 @@ const listingSchema = new Schema({
     required: true,
   },
   description: String,
-  image: {
+  image: [
+    {
     url: String,
     filename:String,
   },
+],
   price: {
     type: Number,
     min: [0, "Price must be a positive number"]

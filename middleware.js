@@ -64,6 +64,9 @@ const isReviewAuthor = async (req, res, next) => {
 // =======================
 
 const validateListing = (req, res, next) => {
+  if (req.body.delete_images && typeof req.body.delete_images === 'string') {
+    req.body.delete_images = req.body.delete_images.split(',');
+  }
   const { error } = listingSchema.validate(req.body, { abortEarly: false });
 
   if (error) {

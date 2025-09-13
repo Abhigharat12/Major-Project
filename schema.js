@@ -21,6 +21,7 @@ const listingSchema = Joi.object({
     }),
     type: Joi.string().required(),
   }).required(),
+  delete_images: Joi.array().items(Joi.string()).allow(''),
 });
 
 const reviewSchema = Joi.object({

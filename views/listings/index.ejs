@@ -37,7 +37,7 @@
     <div class="col">
       <a href="/listings/<%= listing._id %>" class="card-link text-decoration-none text-dark">
         <div class="card travel-card position-relative">
-          <img src="<%= listing.image?.url || '/images/default.jpg' %>" class="card-img-top"
+          <img src="<%= (listing.image && listing.image.length > 0) ? listing.image[0].url : '/images/default.jpg' %>" class="card-img-top"
             style="height: 17rem; object-fit: cover;" alt="<%= listing.title %>" />
           <div class="card-overlay d-flex flex-column justify-content-center align-items-center">
             <p class="overlay-text">Explore Now</p>

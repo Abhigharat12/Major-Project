@@ -1,9 +1,7 @@
 // ======== app.js ========
 
-if(process.env.NODE_ENV !="production")
-{
+if(process.env.NODE_ENV !="production") {
   require("dotenv").config();
-
 }
 
 const express = require("express");
@@ -17,12 +15,9 @@ const MongoStore = require("connect-mongo");
 const passport = require("passport");
 const flash = require("connect-flash");
 const multer  = require('multer');
-const {storage} =require("./cloudConfig.js");
+const {storage} = require("./cloudConfig.js");
 const upload = multer({ storage });
 const apiRoutes = require("./routes/api.js");
-
-
-
 
 const Listing = require("./models/listing");
 const User = require("./models/user");
@@ -46,6 +41,13 @@ const {
 // ✅ Import controllers
 const listingController = require("./controllers/listing");
 const reviewController = require("./controllers/review");
+
+// ================== Razorpay Setup ==================
+const Razorpay = require("razorpay");
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 // ================== Session Setup ==================
 const sessionOptions = {
@@ -71,7 +73,6 @@ mongoose.connect(process.env.MONGO_URL)
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-// app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
@@ -82,17 +83,11 @@ app.use("/api", apiRoutes);
 app.use(express.static("public"));
 
 // Flash messages & user context
-// Make currentUser and currentRoute available to all views
 app.use((req, res, next) => {
   res.locals.currentUser = req.user || null;
   res.locals.currentRoute = req.path;
-  next();
-});
-
-app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
-  res.locals.currentUser = req.user || null;
   next();
 });
 
@@ -104,18 +99,25 @@ app.get("/search", wrapAsync(listingController.searchListings));
 app.get("/", wrapAsync(listingController.index));
 app.get("/listings", wrapAsync(listingController.index));
 app.get("/listings/new", isLoggedIn, listingController.renderNewForm);
-app.post("/listings", isLoggedIn, validateListing, upload.single('listing[image]'),  wrapAsync(listingController.createListing));
-
-
+app.post(
+  "/listings",
+  isLoggedIn,
+  upload.array("images", 5),
+  validateListing,
+  wrapAsync(listingController.createListing)
+);
 
 app.get("/listings/:id", wrapAsync(listingController.showListing));
-app.get(
-  "/listings/:id/edit",
+app.get("/listings/:id/edit", isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
+app.put(
+  "/listings/:id",
   isLoggedIn,
-  isOwner, // make sure this has null check as above
-  wrapAsync(listingController.renderEditForm)
+  isOwner,
+  upload.array("image", 5),
+  validateListing,
+  wrapAsync(listingController.updateListing)
 );
-app.put("/listings/:id", isLoggedIn, isOwner,upload.single('listing[image]'), validateListing, wrapAsync(listingController.updateListing));
+
 app.delete("/listings/:id", isLoggedIn, isOwner, wrapAsync(listingController.deleteListing));
 
 // Admin user list
@@ -128,19 +130,33 @@ app.get("/admin/users", isLoggedIn, wrapAsync(async (req, res) => {
 }));
 
 // Review Routes
-app.post(
-  "/listings/:id/reviews",
-  isLoggedIn,
-  validateReview,
-  wrapAsync(reviewController.createReview)
-);
+app.post("/listings/:id/reviews", isLoggedIn, validateReview, wrapAsync(reviewController.createReview));
+app.delete("/listings/:id/reviews/:reviewId", isLoggedIn, isReviewAuthor, wrapAsync(reviewController.deleteReview));
 
-app.delete(
-  "/listings/:id/reviews/:reviewId",
-  isLoggedIn,
-  isReviewAuthor,
-  wrapAsync(reviewController.deleteReview)
-);
+// ================== Razorpay Payment Routes ==================
+
+// Create order API
+app.post("/create-order", async (req, res) => {
+  const { amount } = req.body; // amount in INR
+  const options = {
+    amount: amount * 100, // convert to paise
+    currency: "INR",
+    receipt: `receipt_${Date.now()}`
+  };
+
+  try {
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (err) {
+    console.error("Razorpay order creation error:", err);
+    res.status(500).send({ error: "Failed to create order" });
+  }
+});
+
+// Serve payment page
+app.get("/pay", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/payment.html"));
+});
 
 // ================== Error Handling ==================
 app.use((req, res, next) => {
@@ -159,6 +175,7 @@ app.use((err, req, res, next) => {
 });
 
 // ================== Start Server ==================
-app.listen(8080, () => {
-  console.log("🚀 Server running at http://localhost:8080");
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
