@@ -1,22 +1,7 @@
 <% layout("/layouts/boilerplate.ejs") -%>
 
-<!-- CSS for custom layout -->
+<!-- CSS -->
 <style>
-  /* .stack {
-    width: 100%;
-    max-width: 400px;
-    transition: 0.25s ease;
-  }
-  .stack:hover {
-    transform: rotate(5deg);
-  }
-  .stack:hover .card:before {
-    transform: translateY(-2%) rotate(-4deg);
-  }
-  .stack:hover .card:after {
-    transform: translateY(2%) rotate(4deg);
-  } */
-
   .card {
     aspect-ratio: 10 / 8;
     border: 2px solid;
@@ -40,12 +25,8 @@
     left: 0;
     transform-origin: center center;
   }
-  .card:before {
-    transform: translateY(-2%) rotate(-6deg);
-  }
-  .card:after {
-    transform: translateY(2%) rotate(6deg);
-  }
+  .card:before { transform: translateY(-2%) rotate(-6deg); }
+  .card:after { transform: translateY(2%) rotate(6deg); }
 
   .image {
     width: 100%;
@@ -69,7 +50,7 @@
   }
 </style>
 
-<!-- MapLibre CSS -->
+<!-- MapLibre -->
 <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
 <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
 
@@ -80,312 +61,134 @@
   </h3>
 
   <div class="row align-items-center gy-4">
-    <!-- Listing Info (Left Column) -->
+    <!-- Left Column -->
     <div class="col-12 col-md-6">
       <ul class="list-group shadow-sm mb-4">
-        <li class="list-group-item"><span class="fw-bold me-2">Title:</span> <%= listing.title %></li>
-        <li class="list-group-item"><span class="fw-bold me-2">Owner:</span> <%= listing.owner?.username || 'Unknown' %></li>
-        <li class="list-group-item"><span class="fw-bold me-2">Description:</span> <%= listing.description %></li>
-        <li class="list-group-item"><span class="fw-bold me-2">Price:</span> ₹ <%= listing.price?.toLocaleString("en-IN") || '500' %></li>
-        <li class="list-group-item"><span class="fw-bold me-2">Location:</span> <%= listing.location %></li>
-        <li class="list-group-item"><span class="fw-bold me-2">Country:</span> <%= listing.country %></li>
+        <li class="list-group-item"><b>Title:</b> <%= listing.title %></li>
+        <li class="list-group-item"><b>Owner:</b> <%= listing.owner ? listing.owner.username : "Unknown" %></li>
+        <li class="list-group-item"><b>Description:</b> <%= listing.description %></li>
+        <li class="list-group-item"><b>Price:</b> ₹ <%= listing.price ? listing.price.toLocaleString("en-IN") : "500" %></li>
+        <li class="list-group-item"><b>Location:</b> <%= listing.location %></li>
+        <li class="list-group-item"><b>Country:</b> <%= listing.country %></li>
       </ul>
 
-      <!-- Action Buttons -->
       <div class="d-flex flex-wrap gap-2">
-        <% if (listing) { %>
-          <a href="/listings/<%= listing._id %>/edit" class="btn btn-warning">Edit</a>
-          <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" style="display:inline;">
-            <button class="btn btn-danger">Delete</button>
-          </form>
-          <button id="payBtn" class="btn btn-success">
-            Pay ₹<%= listing.price ? listing.price.toLocaleString("en-IN") : 500 %>
-          </button>
-        <% } %>
+        <a href="/listings/<%= listing._id %>/edit" class="btn btn-warning">Edit</a>
+        <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" style="display:inline;">
+          <button class="btn btn-danger">Delete</button>
+        </form>
+        <button id="payBtn" class="btn btn-success">
+          Pay ₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "500" %>
+        </button>
       </div>
     </div>
 
-
-<!-- Image Card (Right Column) -->
-<!-- Image Card (Right Column) -->
-<div class="col-12 col-md-6 d-flex justify-content-center">
-  <div class="position-relative stack" style="max-width: 500px;">
-    <div class="card d-flex align-items-center justify-content-center">
-      <% if (listing.image && listing.image.length > 0) { %>
-        <div class="position-relative w-100 h-100">
-          <img 
-            id="listingImage" 
-            src="<%= listing.image[0].url %>" 
-            class="d-block w-100 rounded" 
-            alt="Listing Image"
-            style="max-height: 400px; object-fit: cover;"
-          />
-
-          <!-- Left & Right Controls -->
-          <% if (listing.image.length > 1) { %>
-            <button id="prevBtn" 
-              class="btn btn-dark position-absolute top-50 start-0 translate-middle-y" 
-              style="opacity: 0.7;">&#10094;</button>
-            <button id="nextBtn" 
-              class="btn btn-dark position-absolute top-50 end-0 translate-middle-y" 
-              style="opacity: 0.7;">&#10095;</button>
+    <!-- Right Column (Image) -->
+    <div class="col-12 col-md-6 d-flex justify-content-center">
+      <div class="position-relative stack" style="max-width: 500px;">
+        <div class="card d-flex align-items-center justify-content-center">
+          <% if (listing.image && listing.image.length > 0) { %>
+            <div class="position-relative w-100 h-100">
+              <img id="listingImage" 
+                   src="<%= listing.image[0].url %>" 
+                   class="d-block w-100 rounded"
+                   style="max-height: 400px; object-fit: cover;" />
+              <% if (listing.image.length > 1) { %>
+                <button id="prevBtn" class="btn btn-dark position-absolute top-50 start-0 translate-middle-y">&#10094;</button>
+                <button id="nextBtn" class="btn btn-dark position-absolute top-50 end-0 translate-middle-y">&#10095;</button>
+              <% } %>
+            </div>
+          <% } else { %>
+            <div class="image d-flex align-items-center justify-content-center text-muted p-5">
+              No image available
+            </div>
           <% } %>
         </div>
-      <% } else { %>
-        <div class="image d-flex align-items-center justify-content-center text-muted p-5">
-          No image available
-        </div>
-      <% } %>
+      </div>
     </div>
   </div>
-</div>
 
-
-
-  <!-- Review Form -->
+  <!-- Reviews -->
   <div class="mt-5 p-4 bg-light rounded shadow-sm">
     <h4 class="mb-4 text-primary">Leave a Review</h4>
-    <form method="POST" action="/listings/<%= listing._id %>/reviews" novalidate class="needs-validation">
-      <!-- Starability (Only rating option) -->
+    <form method="POST" action="/listings/<%= listing._id %>/reviews" novalidate>
       <fieldset class="starability-slot mb-4">
         <legend class="form-label fw-semibold">Rating</legend>
-        <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
-        <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-        <label for="first-rate1" title="Terrible">1 star</label>
-        <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-        <label for="first-rate2" title="Not good">2 stars</label>
-        <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-        <label for="first-rate3" title="Average">3 stars</label>
-        <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-        <label for="first-rate4" title="Very good">4 stars</label>
-        <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-        <label for="first-rate5" title="Amazing">5 stars</label>
+        <% for(let i=1; i<=5; i++){ %>
+          <input type="radio" id="rate-<%= i %>" name="review[rating]" value="<%= i %>" />
+          <label for="rate-<%= i %>"><%= i %> star</label>
+        <% } %>
       </fieldset>
-
-      <!-- Comment -->
       <div class="mb-3">
-        <label for="comment" class="form-label fw-semibold">Comment</label>
-        <textarea name="review[comment]" id="comment" rows="4" class="form-control shadow-sm" placeholder="Write your feedback here..." required></textarea>
-        <div class="invalid-feedback">Please add some comments for review</div>
+        <label for="comment">Comment</label>
+        <textarea name="review[comment]" id="comment" rows="4" class="form-control" required></textarea>
       </div>
-      
-      <button class="btn-style-1" style="background: linear-gradient(135deg, #2a71be, #0549a3);">Add Review</button>
+      <button class="btn btn-primary">Add Review</button>
     </form>
   </div>
 
-  <hr />
-
-  <!-- All Reviews -->
-  <h4 class="mb-4">All Reviews</h4>
+  <h4 class="mt-4">All Reviews</h4>
   <div class="row g-4">
-    <% listing.reviews.forEach((review) => { %>
+    <% listing.reviews.forEach(review => { 
+         const avatarUrl = (review.author && review.author.gender === "female")
+            ? "https://cdn-icons-png.flaticon.com/512/2922/2922561.png"
+            : "https://cdn-icons-png.flaticon.com/512/2922/2922510.png";
+    %>
       <div class="col-md-6">
-        <div class="p-4 bg-white border rounded-4 shadow-sm h-100 d-flex flex-column justify-content-between">
+        <div class="p-4 bg-white border rounded shadow-sm">
           <div class="d-flex align-items-center mb-3">
-            <% const avatarUrl = (review.author && review.author.gender === 'female')
-                ? 'https://cdn-icons-png.flaticon.com/512/2922/2922561.png'
-                : 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png'; %>
-            <img 
-              src="<%= avatarUrl %>" 
-              class="rounded-circle border me-3" 
-              alt="User avatar" 
-              width="50" 
-              height="50"
-            />
+            <img src="<%= avatarUrl %>" class="rounded-circle me-3" width="50" height="50" />
             <div>
-              <h6 class="mb-0 text-dark fw-semibold">@<%= review.author?.username || "Unknown" %></h6>
-              <small class="text-muted">
-                <%= review.createdAt ? new Date(review.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' }) : "No date" %>
-              </small>
+              <h6>@<%= review.author ? review.author.username : "Unknown" %></h6>
+              <small><%= review.createdAt ? new Date(review.createdAt).toLocaleDateString("en-IN") : "No date" %></small>
             </div>
           </div>
-
-          <p class="starability-result" data-rating="<%= review.rating %>">
-            Rated: <%= review.rating %> star<%= review.rating > 1 ? 's' : '' %>
-          </p>
-
-          <p class="text-dark flex-grow-1" style="line-height: 1.6;"><%= review.comment %></p>
-
-          <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="mt-3">
-            <button class="btn btn-sm btn-outline-danger w-100">
-              <i class="fa-solid fa-trash"></i> Delete Review
-            </button>
+          <p>Rated: <%= review.rating %> star(s)</p>
+          <p><%= review.comment %></p>
+          <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+            <button class="btn btn-sm btn-outline-danger w-100">Delete Review</button>
           </form>
         </div>
       </div>
-    <% }); %>
+    <% }) %>
   </div>
-
-  <hr>
 
   <!-- Map -->
   <h3 class="mt-4">Location for <%= listing.title %></h3>
-  <div id="map" class="rounded shadow-sm mb-3"></div>
-
-  <div class="d-flex flex-wrap align-items-center gap-2 my-3">
-    <label for="transport-mode" class="form-label fw-semibold mb-0 me-2">Select Mode:</label>
-    <select id="transport-mode" class="form-select form-select-sm w-auto">
-      <option value="driving-car">Driving</option>
-      <option value="cycling-regular">Cycling</option>
-      <option value="foot-walking">Walking</option>
-    </select>
-    <button id="get-route-btn" class="btn btn-sm btn-primary">Get Directions</button>
-  </div>
-
-  <div id="directions-output" class="border rounded bg-light p-3 mb-3" style="max-height: 300px; overflow-y: auto;"></div>
+  <div id="map"></div>
 </div>
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-
+<!-- Cashfree SDK -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-
-  // ---------------- MAP ----------------
-  const MAPTILER_KEY = "<%= process.env.MAPTILER_KEY %>";
-  const listingTitle = "<%= listing.title %>";
-  const listingAddress = "<%= listing.location %>";
-  let map, listingCoords;
-
-  fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(listingAddress)}.json?key=${MAPTILER_KEY}`)
-    .then(res => res.json())
-    .then(data => {
-      if(!data.features.length) throw new Error("Location not found");
-      listingCoords = data.features[0].center;
-
-      map = new maplibregl.Map({
-        container: 'map',
-        style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`,
-        center: listingCoords,
-        zoom: 13
-      });
-
-      map.addControl(new maplibregl.NavigationControl());
-      map.addControl(new maplibregl.GeolocateControl({positionOptions:{enableHighAccuracy:true},trackUserLocation:true,showUserHeading:true}));
-
-      new maplibregl.Marker({color:'tomato'})
-        .setLngLat(listingCoords)
-        .setPopup(new maplibregl.Popup({offset:25}).setHTML(`<strong>${listingTitle}</strong><br><em>You will be here</em>`))
-        .addTo(map);
-    })
-    .catch(err=>{console.error(err.message); alert("Failed to load map: "+err.message);});
-
-  // --------------- ROUTE -----------------
-  const btnRoute = document.getElementById("get-route-btn");
-  const outputDiv = document.getElementById("directions-output");
-
-  if(btnRoute){
-    btnRoute.addEventListener("click",()=>{
-      if(!navigator.geolocation) return alert("Geolocation not supported");
-
-      const selectedMode = document.getElementById("transport-mode").value;
-      navigator.geolocation.getCurrentPosition(async (position)=>{
-        const userCoords=[position.coords.longitude,position.coords.latitude];
-        if(!listingCoords) return alert("Listing coordinates not available");
-
-        new maplibregl.Marker({color:'blue'}).setLngLat(userCoords).setPopup(new maplibregl.Popup().setText("You are here")).addTo(map);
-
-        try{
-          const response = await fetch("/api/route",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({start:userCoords,end:listingCoords,mode:selectedMode})});
-          const data = await response.json();
-          if(!data || !data.features) throw new Error("No route found");
-
-          if(map.getLayer('route')) map.removeLayer('route');
-          if(map.getSource('route')) map.removeSource('route');
-
-          map.addSource('route',{type:'geojson',data});
-          map.addLayer({id:'route',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#007bff','line-width':4}});
-
-          const segment = data.features[0]?.properties?.segments?.[0];
-          const steps = segment?.steps||[];
-          const distance = segment?.distance ? (segment.distance/1000).toFixed(2)+" km":"N/A";
-          const duration = segment?.duration ? formatDuration(segment.duration) : "N/A";
-
-          function formatDuration(seconds){
-            const minutes = Math.round(seconds/60);
-            const hrs = Math.floor(minutes/60);
-            const mins = minutes%60;
-            return hrs>0 ? `${hrs} hr${hrs>1?'s':''} ${mins} min`:`${mins} min`;
-          }
-
-          outputDiv.innerHTML = `
-            <div class="mb-3">
-              <div class="d-flex align-items-center gap-3 flex-wrap">
-                <span class="badge bg-warning text-black px-3 py-2"><b class="fw-semibold text-black">Distance:</b> ${distance}</span>
-                <span class="badge bg-info text-black px-3 py-2"><b class="fw-semibold text-black">Time:</b> ${duration}</span>
-              </div>
-            </div>
-            <hr class="my-3">
-            <h5 class="fw-semibold">Step-by-step Directions:</h5>
-            <ol class="ps-3 mt-2">${steps.length?steps.map(s=>`<li class="mb-1">${s.instruction}</li>`).join(""):"<p class='text-muted'>No directions available.</p>"}</ol>
-          `;
-        }catch(err){console.error(err.message); outputDiv.innerHTML=`<p class="text-danger">Error fetching route. Try a different mode.</p>`;}
-      },()=>{alert("Failed to get your current location.")});
-    });
-  }
-
-
-
-  // --------------- IMAGE CAROUSEL ---------------
-  <% if (listing.image && listing.image.length > 1) { %>
-  const images = <%- JSON.stringify(listing.image.map(function(img){ return img.url; })) %>;
-  let currentIndex = 0;
-
-  const listingImage = document.getElementById("listingImage");
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
-
-    function updateImage() {
-    listingImage.classList.add("fade-out");
-    setTimeout(() => {
-      listingImage.src = images[currentIndex];
-      listingImage.classList.remove("fade-out");
-      listingImage.classList.add("fade-in");
-    }, 500);
-    setTimeout(() => {
-      listingImage.classList.remove("fade-in");
-    }, 1000);
-  }
-
-  prevBtn.addEventListener("click", function() {
-    currentIndex = (currentIndex - 1 + images.length) % images.length;
-    updateImage();
-  });
-
-  nextBtn.addEventListener("click", function() {
-    currentIndex = (currentIndex + 1) % images.length;
-    updateImage();
-  });
-
-  // Initialize first image
-  updateImage();
-<% } %>
-
-  // --------------- RAZORPAY ---------------
+document.addEventListener("DOMContentLoaded", () => {
   const payBtn = document.getElementById("payBtn");
   if(payBtn){
-    payBtn.onclick=async function(){
-      const amount=Number("<%= listing.price ? listing.price : 500 %>");
-      const response = await fetch("/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({amount})});
-      const order = await response.json();
-
-      const options = {
-        key:"<%= process.env.RAZORPAY_KEY_ID %>",
-        amount: order.amount,
-        currency: order.currency,
-        name:"Feel Alive",
-        description: listing.title,
-        order_id: order.id,
-        handler:function(response){alert("Payment Successful! ID: "+response.razorpay_payment_id);},
-        prefill:{name:"<%= currentUser && currentUser.username ? currentUser.username : 'Guest' %>",email:"<%= currentUser && currentUser.email ? currentUser.email : '' %>",contact:""},
-        theme:{color:"#3399cc"}
+    payBtn.onclick = async function(){
+      // const amount = <%= listing.price ? listing.price : 500 %>;
+      // Fix: wrap EJS output in quotes for valid JS
+      const amount = "<%= listing.price ? listing.price : 500 %>";
+      const customer = {
+        id: "<%= currentUser ? currentUser._id : '' %>",
+        name: "<%= currentUser ? currentUser.username : 'Guest' %>",
+        email: "<%= currentUser ? currentUser.email : 'guest@example.com' %>",
       };
+      const listingId = "<%= listing._id %>";
+      const res = await fetch("/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, customer, listingId })
+      });
+      const responseData = await res.json();
+      if (!responseData.data || !responseData.data.payment_session_id) {
+        alert("Payment error: " + (responseData.error || "Unknown error"));
+        return;
+      }
 
-      const rzp = new Razorpay(options);
-      rzp.open();
+      const cashfree = Cashfree({ mode: "sandbox" });
+      cashfree.checkout({ paymentSessionId: responseData.data.payment_session_id, redirectTarget: "_self" });
     }
   }
-
 });
 </script>
