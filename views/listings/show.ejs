@@ -156,6 +156,18 @@
   <!-- Map -->
   <h3 class="mt-4">Location for <%= listing.title %></h3>
   <div id="map"></div>
+
+  <!-- Transport Options -->
+  <div class="d-flex flex-wrap align-items-center gap-2 my-3">
+    <label for="transport-mode" class="form-label fw-semibold mb-0 me-2">Select Mode:</label>
+    <select id="transport-mode" class="form-select form-select-sm w-auto">
+      <option value="driving-car">Driving</option>
+      <option value="cycling-regular">Cycling</option>
+      <option value="foot-walking">Walking</option>
+    </select>
+    <button id="get-route-btn" class="btn btn-sm btn-primary">Get Directions</button>
+  </div>
+  <div id="directions-output" class="border rounded bg-light p-3 mb-3" style="max-height: 300px; overflow-y: auto;"></div>
 </div>
 
 <!-- Cashfree SDK -->
@@ -163,11 +175,10 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // Cashfree Payment
   const payBtn = document.getElementById("payBtn");
   if(payBtn){
     payBtn.onclick = async function(){
-      // const amount = <%= listing.price ? listing.price : 500 %>;
-      // Fix: wrap EJS output in quotes for valid JS
       const amount = "<%= listing.price ? listing.price : 500 %>";
       const customer = {
         id: "<%= currentUser ? currentUser._id : '' %>",
@@ -185,10 +196,110 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Payment error: " + (responseData.error || "Unknown error"));
         return;
       }
-
       const cashfree = Cashfree({ mode: "sandbox" });
       cashfree.checkout({ paymentSessionId: responseData.data.payment_session_id, redirectTarget: "_self" });
     }
+  }
+
+  // MapLibre + Directions
+  const MAPTILER_KEY = "<%= process.env.MAPTILER_KEY %>";
+  const listingTitle = "<%= listing.title %>";
+  const listingAddress = "<%= listing.location %>";
+  let map, listingCoords;
+
+  fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(listingAddress)}.json?key=${MAPTILER_KEY}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.features.length) throw new Error("Location not found");
+      listingCoords = data.features[0].center;
+      map = new maplibregl.Map({
+        container: "map",
+        style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`,
+        center: listingCoords,
+        zoom: 13
+      });
+      map.addControl(new maplibregl.NavigationControl());
+      map.addControl(new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true, showUserHeading: true }));
+      new maplibregl.Marker({ color: "tomato" })
+        .setLngLat(listingCoords)
+        .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<strong>${listingTitle}</strong><br><em>You will be here</em>`))
+        .addTo(map);
+    })
+    .catch(err => {
+      console.error("Map error:", err.message);
+      alert("Failed to load map: " + err.message);
+    });
+
+  const btn = document.getElementById("get-route-btn");
+  const outputDiv = document.getElementById("directions-output");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      if (!navigator.geolocation) return alert("Geolocation not supported");
+      const selectedMode = document.getElementById("transport-mode").value;
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const userCoords = [position.coords.longitude, position.coords.latitude];
+        if (!listingCoords) return alert("Listing coordinates not available");
+
+        new maplibregl.Marker({ color: "blue" })
+          .setLngLat(userCoords)
+          .setPopup(new maplibregl.Popup().setText("You are here"))
+          .addTo(map);
+
+        try {
+          const response = await fetch("/api/route", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ start: userCoords, end: listingCoords, mode: selectedMode })
+          });
+          const data = await response.json();
+          if (!data || !data.features) throw new Error("No route found");
+
+          if (map.getLayer("route")) map.removeLayer("route");
+          if (map.getSource("route")) map.removeSource("route");
+          map.addSource("route", { type: "geojson", data });
+          map.addLayer({
+            id: "route",
+            type: "line",
+            source: "route",
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: { "line-color": "#007bff", "line-width": 4 }
+          });
+
+          const segment = data.features[0]?.properties?.segments?.[0];
+          const steps = segment?.steps || [];
+          const distance = segment?.distance ? (segment.distance / 1000).toFixed(2) + " km" : "N/A";
+          const duration = segment?.duration ? formatDuration(segment.duration) : "N/A";
+
+          function formatDuration(seconds) {
+            const minutes = Math.round(seconds / 60);
+            const hrs = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            if (hrs > 0) return `${hrs} hr${hrs > 1 ? "s" : ""} ${mins} min`;
+            return `${mins} min`;
+          }
+
+          const directionsHTML = `
+            <div class="mb-3">
+              <div class="d-flex align-items-center gap-3 flex-wrap">
+                <span class="badge bg-warning text-black px-3 py-2"><b>Distance:</b> ${distance}</span>
+                <span class="badge bg-info text-black px-3 py-2"><b>Time:</b> ${duration}</span>
+              </div>
+            </div>
+            <hr class="my-3">
+            <h5>Step-by-step Directions:</h5>
+            <ol class="ps-3 mt-2">
+              ${steps.length ? steps.map(step => `<li>${step.instruction}</li>`).join("") : "<p>No directions available.</p>"}
+            </ol>
+          `;
+          outputDiv.innerHTML = directionsHTML;
+        } catch (err) {
+          console.error("Routing error:", err.message);
+          outputDiv.innerHTML = `<p class="text-danger">Error fetching route. Try again.</p>`;
+        }
+      }, () => {
+        alert("Failed to get your current location.");
+      });
+    });
   }
 });
 </script>
